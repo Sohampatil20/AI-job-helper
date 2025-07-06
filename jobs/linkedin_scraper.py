@@ -10,8 +10,7 @@ from selenium.common.exceptions import NoSuchElementException
 import warnings
 warnings.filterwarnings('ignore')
 
-# Import our custom webdriver utility
-from .webdriver_utils import setup_webdriver
+
 
 class LinkedInScraper:
     """Class for scraping job listings from LinkedIn"""
