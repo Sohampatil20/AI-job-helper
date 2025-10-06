@@ -1,4 +1,4 @@
-"""Company data and market insights for job search (Updated 2025)"""
+"""Company data and market insights for job search"""
 
 FEATURED_COMPANIES = {
     "tech": [
@@ -7,7 +7,7 @@ FEATURED_COMPANIES = {
             "icon": "fab fa-google",
             "color": "#4285F4",
             "careers_url": "https://careers.google.com",
-            "description": "Global leader in AI, search, cloud computing, and innovation",
+            "description": "Leading technology company known for search, cloud, and innovation",
             "categories": ["Software", "AI/ML", "Cloud", "Data Science"]
         },
         {
@@ -15,15 +15,15 @@ FEATURED_COMPANIES = {
             "icon": "fab fa-microsoft",
             "color": "#00A4EF",
             "careers_url": "https://careers.microsoft.com",
-            "description": "Leading provider of software, cloud, and enterprise AI solutions",
-            "categories": ["Software", "Cloud", "AI/ML", "Enterprise"]
+            "description": "Global leader in software, cloud, and enterprise solutions",
+            "categories": ["Software", "Cloud", "Gaming", "Enterprise"]
         },
         {
             "name": "Amazon",
             "icon": "fab fa-amazon",
             "color": "#FF9900",
             "careers_url": "https://www.amazon.jobs",
-            "description": "Global e-commerce and cloud technology leader",
+            "description": "E-commerce and cloud computing giant",
             "categories": ["Software", "Operations", "Cloud", "Retail"]
         },
         {
@@ -31,24 +31,24 @@ FEATURED_COMPANIES = {
             "icon": "fab fa-apple",
             "color": "#555555",
             "careers_url": "https://www.apple.com/careers",
-            "description": "Innovator in hardware, software, and user experience",
+            "description": "Innovation leader in consumer technology",
             "categories": ["Software", "Hardware", "Design", "AI/ML"]
         },
         {
-            "name": "Meta",
+            "name": "Facebook",
             "icon": "fab fa-facebook",
             "color": "#1877F2",
             "careers_url": "https://www.metacareers.com/",
-            "description": "Social technology company shaping the metaverse and AI experiences",
-            "categories": ["Software", "AI/ML", "XR/AR", "Social"]
+            "description": "Social media and technology company",
+            "categories": ["Software", "Marketing", "Networking", "AI/ML"]
         },
         {
             "name": "Netflix",
             "icon": "fas fa-play-circle",
             "color": "#E50914",
             "careers_url": "https://explore.jobs.netflix.net/careers",
-            "description": "Streaming and entertainment technology pioneer",
-            "categories": ["Software", "Design", "Content", "Data"],
+            "description": "Streaming media company",
+            "categories": ["Software", "Marketing", "Design", "Service"],
             "logo_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/1920px-Netflix_2015_logo.svg.png",
             "website": "https://jobs.netflix.com/",
             "industry": "Entertainment & Technology"
@@ -60,7 +60,7 @@ FEATURED_COMPANIES = {
             "icon": "fas fa-building",
             "color": "#0070C0",
             "careers_url": "https://www.tcs.com/careers",
-            "description": "India’s largest IT services and digital transformation company",
+            "description": "India's largest IT services company",
             "categories": ["IT Services", "Consulting", "Digital"]
         },
         {
@@ -68,7 +68,7 @@ FEATURED_COMPANIES = {
             "icon": "fas fa-building",
             "color": "#007CC3",
             "careers_url": "https://www.infosys.com/careers",
-            "description": "Global leader in digital services and next-gen consulting",
+            "description": "Global leader in digital services and consulting",
             "categories": ["IT Services", "Consulting", "Digital"]
         },
         {
@@ -76,7 +76,7 @@ FEATURED_COMPANIES = {
             "icon": "fas fa-building",
             "color": "#341F65",
             "careers_url": "https://careers.wipro.com",
-            "description": "Global IT, consulting, and engineering solutions company",
+            "description": "Leading global information technology company",
             "categories": ["IT Services", "Consulting", "Digital"]
         },
         {
@@ -84,7 +84,7 @@ FEATURED_COMPANIES = {
             "icon": "fas fa-building",
             "color": "#0075C9",
             "careers_url": "https://www.hcltech.com/careers",
-            "description": "Technology company focused on engineering and digital solutions",
+            "description": "Global technology company",
             "categories": ["IT Services", "Engineering", "Digital"]
         }
     ],
@@ -94,7 +94,7 @@ FEATURED_COMPANIES = {
             "icon": "fas fa-server",
             "color": "#1F70C1",
             "careers_url": "https://www.ibm.com/careers",
-            "description": "Global leader in AI, hybrid cloud, and consulting",
+            "description": "Global leader in technology and consulting",
             "categories": ["Software", "Consulting", "AI/ML", "Cloud"],
             "logo_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/1920px-IBM_logo.svg.png",
             "website": "https://www.ibm.com/careers/",
@@ -105,7 +105,7 @@ FEATURED_COMPANIES = {
             "icon": "fas fa-building",
             "color": "#A100FF",
             "careers_url": "https://www.accenture.com/careers",
-            "description": "Global professional services company specializing in technology and strategy",
+            "description": "Global professional services company",
             "categories": ["Consulting", "Technology", "Digital"]
         },
         {
@@ -113,7 +113,7 @@ FEATURED_COMPANIES = {
             "icon": "fas fa-building",
             "color": "#1299D8",
             "careers_url": "https://careers.cognizant.com",
-            "description": "IT services company driving digital transformation and cloud adoption",
+            "description": "Leading professional services company",
             "categories": ["IT Services", "Consulting", "Digital"]
         }
     ]
@@ -121,41 +121,41 @@ FEATURED_COMPANIES = {
 
 JOB_MARKET_INSIGHTS = {
     "trending_skills": [
-        {"name": "Artificial Intelligence / AI Fluency", "growth": "+45%", "icon": "fas fa-brain"},
-        {"name": "Machine Learning / Generative AI", "growth": "+42%", "icon": "fas fa-robot"},
-        {"name": "Cloud Computing & Distributed Systems", "growth": "+38%", "icon": "fas fa-cloud"},
-        {"name": "Data Analytics / Big Data", "growth": "+36%", "icon": "fas fa-chart-line"},
-        {"name": "Cybersecurity / Information Security", "growth": "+33%", "icon": "fas fa-shield-alt"},
-        {"name": "DevOps / Site Reliability", "growth": "+30%", "icon": "fas fa-code-branch"},
-        {"name": "Prompt Engineering / AI Ops", "growth": "+28%", "icon": "fas fa-keyboard"},
-        {"name": "Low-Code / No-Code Automation", "growth": "+25%", "icon": "fas fa-cogs"},
-        {"name": "Digital & Data Literacy", "growth": "+23%", "icon": "fas fa-database"}
+        {"name": "Artificial Intelligence", "growth": "+45%", "icon": "fas fa-brain"},
+        {"name": "Cloud Computing", "growth": "+38%", "icon": "fas fa-cloud"},
+        {"name": "Data Science", "growth": "+35%", "icon": "fas fa-chart-line"},
+        {"name": "Cybersecurity", "growth": "+32%", "icon": "fas fa-shield-alt"},
+        {"name": "DevOps", "growth": "+30%", "icon": "fas fa-code-branch"},
+        {"name": "Machine Learning", "growth": "+28%", "icon": "fas fa-robot"},
+        {"name": "Blockchain", "growth": "+25%", "icon": "fas fa-lock"},
+        {"name": "Big Data", "growth": "+23%", "icon": "fas fa-database"},
+        {"name": "Internet of Things", "growth": "+21%", "icon": "fas fa-wifi"}
     ],
     "top_locations": [
-        {"name": "Bangalore", "jobs": "65,000+", "icon": "fas fa-city"},
-        {"name": "Hyderabad", "jobs": "42,000+", "icon": "fas fa-city"},
-        {"name": "Pune", "jobs": "28,000+", "icon": "fas fa-city"},
+        {"name": "Bangalore", "jobs": "50,000+", "icon": "fas fa-city"},
         {"name": "Mumbai", "jobs": "35,000+", "icon": "fas fa-city"},
         {"name": "Delhi NCR", "jobs": "30,000+", "icon": "fas fa-city"},
-        {"name": "Chennai", "jobs": "20,000+", "icon": "fas fa-city"},
-        {"name": "Noida", "jobs": "12,000+", "icon": "fas fa-city"},
-        {"name": "Ahmedabad", "jobs": "8,000+", "icon": "fas fa-city"},
-        {"name": "Kolkata", "jobs": "7,000+", "icon": "fas fa-city"},
-        {"name": "Remote", "jobs": "6,000+", "icon": "fas fa-globe-americas"}
+        {"name": "Hyderabad", "jobs": "25,000+", "icon": "fas fa-city"},
+        {"name": "Pune", "jobs": "20,000+", "icon": "fas fa-city"},
+        {"name": "Chennai", "jobs": "15,000+", "icon": "fas fa-city"},
+        {"name": "Noida", "jobs": "10,000+", "icon": "fas fa-city"},
+        {"name": "Vadodara", "jobs": "7,000+", "icon": "fas fa-city"},
+        {"name": "Ahmedabad", "jobs": "6,000+", "icon": "fas fa-city"},
+        {"name": "Remote", "jobs": "3,000+", "icon": "fas fa-globe-americas"},
     ],
     "salary_insights": [
-        {"role": "Machine Learning Engineer", "range": "12-40 LPA", "experience": "0-5 years"},
-        {"role": "Big Data Engineer", "range": "10-35 LPA", "experience": "0-5 years"},
-        {"role": "Software Engineer", "range": "6-28 LPA", "experience": "0-5 years"},
-        {"role": "Data Scientist", "range": "10-35 LPA", "experience": "0-5 years"},
-        {"role": "DevOps Engineer", "range": "8-30 LPA", "experience": "0-5 years"},
-        {"role": "UI/UX Designer", "range": "6-28 LPA", "experience": "0-5 years"},
-        {"role": "Full Stack Developer", "range": "10-35 LPA", "experience": "0-5 years"},
-        {"role": "C++/C#/Python/Java Developer", "range": "7-30 LPA", "experience": "0-5 years"},
-        {"role": "Django Developer", "range": "8-32 LPA", "experience": "0-5 years"},
-        {"role": "Cloud Engineer", "range": "8-30 LPA", "experience": "0-5 years"},
-        {"role": "Google Cloud/AWS/Azure Engineer", "range": "8-30 LPA", "experience": "0-5 years"},
-        {"role": "Salesforce Engineer", "range": "8-30 LPA", "experience": "0-5 years"}
+        {"role": "Machine Learning Engineer", "range": "10-35 LPA", "experience": "0-5 years"},
+        {"role": "Big Data Engineer", "range": "8-30 LPA", "experience": "0-5 years"},
+        {"role": "Software Engineer", "range": "5-25 LPA", "experience": "0-5 years"},
+        {"role": "Data Scientist", "range": "8-30 LPA", "experience": "0-5 years"},
+        {"role": "DevOps Engineer", "range": "6-28 LPA", "experience": "0-5 years"},
+        {"role": "UI/UX Designer", "range": "5-25 LPA", "experience": "0-5 years"},
+        {"role": "Full Stack Developer", "range": "8-30 LPA", "experience": "0-5 years"},
+        {"role": "C++/C#/Python/Java Developer", "range": "6-26 LPA", "experience": "0-5 years"},
+        {"role": "Django Developer", "range": "7-27 LPA", "experience": "0-5 years"},
+        {"role": "Cloud Engineer", "range": "6-26 LPA", "experience": "0-5 years"},
+        {"role": "Google Cloud/AWS/Azure Engineer", "range": "6-26 LPA", "experience": "0-5 years"},
+        {"role": "Salesforce Engineer", "range": "6-26 LPA", "experience": "0-5 years"},
     ]
 }
 
@@ -173,7 +173,7 @@ def get_company_info(company_name):
     """Get company information by name"""
     for companies in FEATURED_COMPANIES.values():
         for company in companies:
-            if company["name"].lower() == company_name.lower():
+            if company["name"] == company_name:
                 return company
     return None
 
@@ -182,6 +182,6 @@ def get_companies_by_industry(industry):
     companies = []
     for companies_list in FEATURED_COMPANIES.values():
         for company in companies_list:
-            if "industry" in company and company["industry"].lower() == industry.lower():
+            if "industry" in company and company["industry"] == industry:
                 companies.append(company)
     return companies
