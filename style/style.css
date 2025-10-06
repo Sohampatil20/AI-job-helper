@@ -1,187 +1,505 @@
-"""Company data and market insights for job search (Updated 2025)"""
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-FEATURED_COMPANIES = {
-    "tech": [
-        {
-            "name": "Google",
-            "icon": "fab fa-google",
-            "color": "#4285F4",
-            "careers_url": "https://careers.google.com",
-            "description": "Global leader in AI, search, cloud computing, and innovation",
-            "categories": ["Software", "AI/ML", "Cloud", "Data Science"]
-        },
-        {
-            "name": "Microsoft",
-            "icon": "fab fa-microsoft",
-            "color": "#00A4EF",
-            "careers_url": "https://careers.microsoft.com",
-            "description": "Leading provider of software, cloud, and enterprise AI solutions",
-            "categories": ["Software", "Cloud", "AI/ML", "Enterprise"]
-        },
-        {
-            "name": "Amazon",
-            "icon": "fab fa-amazon",
-            "color": "#FF9900",
-            "careers_url": "https://www.amazon.jobs",
-            "description": "Global e-commerce and cloud technology leader",
-            "categories": ["Software", "Operations", "Cloud", "Retail"]
-        },
-        {
-            "name": "Apple",
-            "icon": "fab fa-apple",
-            "color": "#555555",
-            "careers_url": "https://www.apple.com/careers",
-            "description": "Innovator in hardware, software, and user experience",
-            "categories": ["Software", "Hardware", "Design", "AI/ML"]
-        },
-        {
-            "name": "Meta",
-            "icon": "fab fa-facebook",
-            "color": "#1877F2",
-            "careers_url": "https://www.metacareers.com/",
-            "description": "Social technology company shaping the metaverse and AI experiences",
-            "categories": ["Software", "AI/ML", "XR/AR", "Social"]
-        },
-        {
-            "name": "Netflix",
-            "icon": "fas fa-play-circle",
-            "color": "#E50914",
-            "careers_url": "https://explore.jobs.netflix.net/careers",
-            "description": "Streaming and entertainment technology pioneer",
-            "categories": ["Software", "Design", "Content", "Data"],
-            "logo_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/1920px-Netflix_2015_logo.svg.png",
-            "website": "https://jobs.netflix.com/",
-            "industry": "Entertainment & Technology"
-        }
-    ],
-    "indian_tech": [
-        {
-            "name": "TCS",
-            "icon": "fas fa-building",
-            "color": "#0070C0",
-            "careers_url": "https://www.tcs.com/careers",
-            "description": "India’s largest IT services and digital transformation company",
-            "categories": ["IT Services", "Consulting", "Digital"]
-        },
-        {
-            "name": "Infosys",
-            "icon": "fas fa-building",
-            "color": "#007CC3",
-            "careers_url": "https://www.infosys.com/careers",
-            "description": "Global leader in digital services and next-gen consulting",
-            "categories": ["IT Services", "Consulting", "Digital"]
-        },
-        {
-            "name": "Wipro",
-            "icon": "fas fa-building",
-            "color": "#341F65",
-            "careers_url": "https://careers.wipro.com",
-            "description": "Global IT, consulting, and engineering solutions company",
-            "categories": ["IT Services", "Consulting", "Digital"]
-        },
-        {
-            "name": "HCL",
-            "icon": "fas fa-building",
-            "color": "#0075C9",
-            "careers_url": "https://www.hcltech.com/careers",
-            "description": "Technology company focused on engineering and digital solutions",
-            "categories": ["IT Services", "Engineering", "Digital"]
-        }
-    ],
-    "global_corps": [
-        {
-            "name": "IBM",
-            "icon": "fas fa-server",
-            "color": "#1F70C1",
-            "careers_url": "https://www.ibm.com/careers",
-            "description": "Global leader in AI, hybrid cloud, and consulting",
-            "categories": ["Software", "Consulting", "AI/ML", "Cloud"],
-            "logo_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/1920px-IBM_logo.svg.png",
-            "website": "https://www.ibm.com/careers/",
-            "industry": "Technology & Consulting"
-        },
-        {
-            "name": "Accenture",
-            "icon": "fas fa-building",
-            "color": "#A100FF",
-            "careers_url": "https://www.accenture.com/careers",
-            "description": "Global professional services company specializing in technology and strategy",
-            "categories": ["Consulting", "Technology", "Digital"]
-        },
-        {
-            "name": "Cognizant",
-            "icon": "fas fa-building",
-            "color": "#1299D8",
-            "careers_url": "https://careers.cognizant.com",
-            "description": "IT services company driving digital transformation and cloud adoption",
-            "categories": ["IT Services", "Consulting", "Digital"]
-        }
-    ]
+/* Root Variables - Complete Color Overhaul */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    
+    --accent-color: #667eea;
+    --accent-secondary: #f093fb;
+    --accent-tertiary: #4facfe;
+    
+    --bg-dark: #0f0f23;
+    --bg-darker: #0a0a15;
+    --bg-light: #1a1a35;
+    --bg-card: rgba(26, 26, 53, 0.6);
+    
+    --text-primary: #f0f0ff;
+    --text-secondary: #a0a0c0;
+    --border-color: rgba(102, 126, 234, 0.2);
+    
+    --success-color: #43e97b;
+    --warning-color: #feca57;
+    --error-color: #ff6b6b;
 }
 
-JOB_MARKET_INSIGHTS = {
-    "trending_skills": [
-        {"name": "Artificial Intelligence / AI Fluency", "growth": "+45%", "icon": "fas fa-brain"},
-        {"name": "Machine Learning / Generative AI", "growth": "+42%", "icon": "fas fa-robot"},
-        {"name": "Cloud Computing & Distributed Systems", "growth": "+38%", "icon": "fas fa-cloud"},
-        {"name": "Data Analytics / Big Data", "growth": "+36%", "icon": "fas fa-chart-line"},
-        {"name": "Cybersecurity / Information Security", "growth": "+33%", "icon": "fas fa-shield-alt"},
-        {"name": "DevOps / Site Reliability", "growth": "+30%", "icon": "fas fa-code-branch"},
-        {"name": "Prompt Engineering / AI Ops", "growth": "+28%", "icon": "fas fa-keyboard"},
-        {"name": "Low-Code / No-Code Automation", "growth": "+25%", "icon": "fas fa-cogs"},
-        {"name": "Digital & Data Literacy", "growth": "+23%", "icon": "fas fa-database"}
-    ],
-    "top_locations": [
-        {"name": "Bangalore", "jobs": "65,000+", "icon": "fas fa-city"},
-        {"name": "Hyderabad", "jobs": "42,000+", "icon": "fas fa-city"},
-        {"name": "Pune", "jobs": "28,000+", "icon": "fas fa-city"},
-        {"name": "Mumbai", "jobs": "35,000+", "icon": "fas fa-city"},
-        {"name": "Delhi NCR", "jobs": "30,000+", "icon": "fas fa-city"},
-        {"name": "Chennai", "jobs": "20,000+", "icon": "fas fa-city"},
-        {"name": "Noida", "jobs": "12,000+", "icon": "fas fa-city"},
-        {"name": "Ahmedabad", "jobs": "8,000+", "icon": "fas fa-city"},
-        {"name": "Kolkata", "jobs": "7,000+", "icon": "fas fa-city"},
-        {"name": "Remote", "jobs": "6,000+", "icon": "fas fa-globe-americas"}
-    ],
-    "salary_insights": [
-        {"role": "Machine Learning Engineer", "range": "12-40 LPA", "experience": "0-5 years"},
-        {"role": "Big Data Engineer", "range": "10-35 LPA", "experience": "0-5 years"},
-        {"role": "Software Engineer", "range": "6-28 LPA", "experience": "0-5 years"},
-        {"role": "Data Scientist", "range": "10-35 LPA", "experience": "0-5 years"},
-        {"role": "DevOps Engineer", "range": "8-30 LPA", "experience": "0-5 years"},
-        {"role": "UI/UX Designer", "range": "6-28 LPA", "experience": "0-5 years"},
-        {"role": "Full Stack Developer", "range": "10-35 LPA", "experience": "0-5 years"},
-        {"role": "C++/C#/Python/Java Developer", "range": "7-30 LPA", "experience": "0-5 years"},
-        {"role": "Django Developer", "range": "8-32 LPA", "experience": "0-5 years"},
-        {"role": "Cloud Engineer", "range": "8-30 LPA", "experience": "0-5 years"},
-        {"role": "Google Cloud/AWS/Azure Engineer", "range": "8-30 LPA", "experience": "0-5 years"},
-        {"role": "Salesforce Engineer", "range": "8-30 LPA", "experience": "0-5 years"}
-    ]
+/* Global Styles */
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg-darker);
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(102, 126, 234, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(240, 147, 251, 0.1) 0px, transparent 50%);
+    color: var(--text-primary);
+    line-height: 1.6;
 }
 
-def get_featured_companies(category=None):
-    """Get featured companies, optionally filtered by category"""
-    if category and category in FEATURED_COMPANIES:
-        return FEATURED_COMPANIES[category]
-    return [company for companies in FEATURED_COMPANIES.values() for company in companies]
+.stApp {
+    background: transparent;
+}
 
-def get_market_insights():
-    """Get job market insights"""
-    return JOB_MARKET_INSIGHTS
+/* Main container */
+.main {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    background: transparent;
+    color: var(--text-primary);
+}
 
-def get_company_info(company_name):
-    """Get company information by name"""
-    for companies in FEATURED_COMPANIES.values():
-        for company in companies:
-            if company["name"].lower() == company_name.lower():
-                return company
-    return None
+/* Sidebar Styling */
+.css-1d391kg {
+    background: linear-gradient(180deg, rgba(26, 26, 53, 0.95) 0%, rgba(15, 15, 35, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid var(--border-color);
+}
 
-def get_companies_by_industry(industry):
-    """Get list of companies by industry"""
-    companies = []
-    for companies_list in FEATURED_COMPANIES.values():
-        for company in companies_list:
-            if "industry" in company and company["industry"].lower() == industry.lower():
-                companies.append(company)
-    return companies
+/* Card Styling - Glassmorphism */
+.stCard {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stCard::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+    z-index: 0;
+}
+
+.stCard:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 20px 60px rgba(102, 126, 234, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-color: var(--accent-color);
+}
+
+/* Button Styling - Neon Glow */
+.stButton > button {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.stButton > button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: 0.5s;
+}
+
+.stButton > button:hover::before {
+    left: 100%;
+}
+
+.stButton > button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+}
+
+/* Input Fields - Neon Border */
+.stTextInput > div > div {
+    background: rgba(26, 26, 53, 0.5);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 16px;
+    padding: 0;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.stTextInput > div > div:focus-within {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+    background: rgba(26, 26, 53, 0.8);
+}
+
+/* Password Input Styles */
+div[data-baseweb="base-input"] {
+    background: transparent !important;
+    border: none !important;
+}
+
+div[data-baseweb="input"] {
+    background: rgba(26, 26, 53, 0.5) !important;
+    border: 2px solid var(--border-color) !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(10px) !important;
+    transition: all 0.3s ease !important;
+}
+
+div[data-baseweb="input"]:focus-within {
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5) !important;
+    background: rgba(26, 26, 53, 0.8) !important;
+}
+
+div[data-baseweb="input"] input {
+    background: transparent !important;
+    border: none !important;
+    color: var(--text-primary) !important;
+    font-size: 14px !important;
+    padding: 14px !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+}
+
+div[data-baseweb="input"] button {
+    color: var(--accent-secondary) !important;
+    transition: all 0.3s ease !important;
+}
+
+div[data-baseweb="input"] button:hover {
+    color: var(--accent-color) !important;
+    transform: scale(1.1);
+}
+
+/* File Uploader - Holographic Effect */
+.stFileUploader {
+    background: var(--bg-card);
+    border: 3px dashed var(--border-color);
+    border-radius: 24px;
+    padding: 3rem;
+    backdrop-filter: blur(20px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stFileUploader::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: var(--primary-gradient);
+    border-radius: 24px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.stFileUploader:hover::before {
+    opacity: 0.3;
+}
+
+.stFileUploader:hover {
+    border-color: var(--accent-color);
+    transform: scale(1.02);
+}
+
+/* Metrics - Gradient Cards */
+.stMetric {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    padding: 1.5rem;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.stMetric:hover {
+    transform: translateX(10px);
+    box-shadow: 0 12px 48px rgba(102, 126, 234, 0.4);
+}
+
+/* Headers - Holographic Text */
+h1, h2, h3 {
+    color: var(--text-primary);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+h1 {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 800;
+    text-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+}
+
+h2 {
+    background: var(--secondary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2.5rem;
+}
+
+/* Feature Card - 3D Effect */
+.feature-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 2rem;
+    margin: 1rem 0;
+    border: 1px solid var(--border-color);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--primary-gradient);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover::after {
+    transform: scaleX(1);
+}
+
+.feature-card:hover {
+    transform: translateY(-12px) rotateX(2deg);
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+    border-color: var(--accent-color);
+}
+
+/* Page Header - Aurora Effect */
+.page-header {
+    position: relative;
+    padding: 3rem 2rem;
+    margin-bottom: 3rem;
+    border-radius: 32px;
+    background: var(--bg-card);
+    backdrop-filter: blur(30px);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg,
+        rgba(102, 126, 234, 0.2) 0%,
+        rgba(240, 147, 251, 0.2) 25%,
+        rgba(79, 172, 254, 0.2) 50%,
+        rgba(102, 126, 234, 0.2) 75%,
+        rgba(240, 147, 251, 0.2) 100%
+    );
+    background-size: 400% 400%;
+    animation: aurora 15s ease infinite;
+    z-index: 0;
+}
+
+@keyframes aurora {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.header-title {
+    position: relative;
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+    z-index: 1;
+    animation: fadeInUp 0.8s ease;
+}
+
+.header-subtitle {
+    position: relative;
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+    z-index: 1;
+    animation: fadeInUp 1s ease;
+}
+
+.header-description {
+    position: relative;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    z-index: 1;
+    animation: fadeInUp 1.2s ease;
+}
+
+/* Hero Header - Expanded Aurora */
+.hero-header {
+    padding: 5rem 3rem;
+    background: linear-gradient(135deg,
+        rgba(102, 126, 234, 0.15) 0%,
+        rgba(240, 147, 251, 0.15) 100%
+    );
+}
+
+.hero-header .header-title {
+    font-size: 4rem;
+}
+
+/* Feedback Section - Neon Glow */
+.feedback-section {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 2.5rem;
+    margin: 2rem 0;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.feedback-header {
+    font-size: 1.8rem;
+    background: var(--secondary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(240, 147, 251, 0.3);
+}
+
+.feedback-item {
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    border-left: 4px solid var(--accent-color);
+    transition: all 0.3s ease;
+}
+
+.feedback-item:hover {
+    transform: translateX(10px);
+    background: rgba(102, 126, 234, 0.2);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.feedback-category {
+    font-weight: 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+/* Scrollbar - Neon Style */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-darker);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-gradient);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.8);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Expander - Glassmorphism */
+.stExpander {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    margin: 1rem 0;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.stExpander:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+/* Progress Bars - Neon */
+.stProgress > div > div {
+    background: var(--primary-gradient) !important;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.6);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-title {
+        font-size: 2.5rem !important;
+    }
+    
+    .hero-header .header-title {
+        font-size: 3rem !important;
+    }
+    
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    .main {
+        padding: 1rem;
+    }
+}
