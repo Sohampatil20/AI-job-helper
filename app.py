@@ -1369,7 +1369,7 @@ class ResumeApp:
                             st.error(f"Error saving to database: {str(e)}")
                             print(f"Database error: {e}")
 
-                       # Show results based on document type
+                      # Show results based on document type
 if analysis.get('document_type') != 'resume':
     st.error(
         f"⚠️ This appears to be a {analysis['document_type']} document, not a resume!"
@@ -1382,97 +1382,94 @@ if analysis.get('document_type') != 'resume':
 # Display results in a modern card layout
 col1, col2 = st.columns(2)
 
-                    with col1:
-                        # ATS Score Card with circular progress
-                        st.markdown("""
-                        <div class="feature-card">
-                            <h2>ATS Score</h2>
-                            <div style="position: relative; width: 150px; height: 150px; margin: 0 auto;">
-                                <div style="
-                                    position: absolute;
-                                    width: 150px;
-                                    height: 150px;
-                                    border-radius: 50%;
-                                    background: conic-gradient(
-                                        #4CAF50 0% {score}%,
-                                        #2c2c2c {score}% 100%
-                                    );
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                ">
-                                    <div style="
-                                        width: 120px;
-                                        height: 120px;
-                                        background: #1a1a1a;
-                                        border-radius: 50%;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        font-size: 24px;
-                                        font-weight: bold;
-                                        color: {color};
-                                    ">
-                                        {score}
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="text-align: center; margin-top: 10px;">
-                                <span style="
-                                    font-size: 1.2em;
-                                    color: {color};
-                                    font-weight: bold;
-                                ">
-                                    {status}
-                                </span>
-                            </div>
-                        """.format(
-                            score=analysis['ats_score'],
-                            color='#4CAF50' if analysis['ats_score'] >= 80 else '#FFA500' if analysis[
-                                'ats_score'] >= 60 else '#FF4444',
-                            status='Excellent' if analysis['ats_score'] >= 80 else 'Good' if analysis[
-                                'ats_score'] >= 60 else 'Needs Improvement'
-                        ), unsafe_allow_html=True)
+with col1:
+    # ATS Score Card with circular progress
+    st.markdown("""
+    <div class="feature-card">
+        <h2>ATS Score</h2>
+        <div style="position: relative; width: 150px; height: 150px; margin: 0 auto;">
+            <div style="
+                position: absolute;
+                width: 150px;
+                height: 150px;
+                border-radius: 50%;
+                background: conic-gradient(
+                    #4CAF50 0% {score}%,
+                    #2c2c2c {score}% 100%
+                );
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            ">
+                <div style="
+                    width: 120px;
+                    height: 120px;
+                    background: #1a1a1a;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: {color};
+                ">
+                    {score}
+                </div>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 10px;">
+            <span style="
+                font-size: 1.2em;
+                color: {color};
+                font-weight: bold;
+            ">
+                {status}
+            </span>
+        </div>
+    </div>
+    """.format(
+        score=analysis['ats_score'],
+        color='#4CAF50' if analysis['ats_score'] >= 80 else '#FFA500' if analysis['ats_score'] >= 60 else '#FF4444',
+        status='Excellent' if analysis['ats_score'] >= 80 else 'Good' if analysis['ats_score'] >= 60 else 'Needs Improvement'
+    ), unsafe_allow_html=True)
 
-                        st.markdown("</div>", unsafe_allow_html=True)
+    # Skills Match Card
+    st.markdown("""
+    <div class="feature-card">
+        <h2>Skills Match</h2>
+    """, unsafe_allow_html=True)
 
-                        # self.display_analysis_results(analysis_results)
+    st.metric(
+        "Keyword Match", f"{int(analysis.get('keyword_match', {}).get('score', 0))}%"
+    )
 
-                        # Skills Match Card
-                        st.markdown("""
-                        <div class="feature-card">
-                            <h2>Skills Match</h2>
-                        """, unsafe_allow_html=True)
+    if analysis.get('keyword_match', {}).get('missing_skills'):
+        st.markdown("#### Missing Skills:")
+        for skill in analysis['keyword_match']['missing_skills']:
+            st.markdown(f"- {skill}")
 
-                        st.metric(
-                            "Keyword Match", f"{int(analysis.get('keyword_match', {}).get('score', 0))}%")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-                        if analysis['keyword_match']['missing_skills']:
-                            st.markdown("#### Missing Skills:")
-                            for skill in analysis['keyword_match']['missing_skills']:
-                                st.markdown(f"- {skill}")
+with col2:
+    # Format Score Card
+    st.markdown("""
+    <div class="feature-card">
+        <h2>Format Analysis</h2>
+    """, unsafe_allow_html=True)
 
-                        st.markdown("</div>", unsafe_allow_html=True)
+    st.metric("Format Score", f"{int(analysis.get('format_score', 0))}%")
+    st.metric("Section Score", f"{int(analysis.get('section_score', 0))}%")
 
-                    with col2:
-                        # Format Score Card
-                        st.markdown("""
-                        <div class="feature-card">
-                            <h2>Format Analysis</h2>
-                        """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-                        st.metric("Format Score",
-                                  f"{int(analysis.get('format_score', 0))}%")
-                        st.metric("Section Score",
-                                  f"{int(analysis.get('section_score', 0))}%")
+    # Suggestions Card with improved UI
+    st.markdown("""
+    <div class="feature-card">
+        <h2>📋 Resume Improvement Suggestions</h2>
+    """, unsafe_allow_html=True)
 
-                        st.markdown("</div>", unsafe_allow_html=True)
+    # (You can continue your suggestion rendering code here)
 
-                        # Suggestions Card with improved UI
-                        st.markdown("""
-                        <div class="feature-card">
-                            <h2>📋 Resume Improvement Suggestions</h2>
-                        """, unsafe_allow_html=True)
 
                             # Contact Section
                         if analysis.get('contact_suggestions'):
