@@ -1470,219 +1470,131 @@ with col2:
 
     # (You can continue your suggestion rendering code here)
 
+# Contact Section
+if analysis.get('contact_suggestions'):
+    st.markdown("""
+    <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+        <h3 style='color: #4CAF50; margin-bottom: 10px;'>📞 Contact Information</h3>
+        <ul style='list-style-type: none; padding-left: 0;'>
+    """, unsafe_allow_html=True)
+    for suggestion in analysis.get('contact_suggestions', []):
+        st.markdown(f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>", unsafe_allow_html=True)
+    st.markdown("</ul></div>", unsafe_allow_html=True)
 
-                            # Contact Section
-                        if analysis.get('contact_suggestions'):
-                                st.markdown("""
-                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-                                    <h3 style='color: #4CAF50; margin-bottom: 10px;'>📞 Contact Information</h3>
-                                    <ul style='list-style-type: none; padding-left: 0;'>
-                                """, unsafe_allow_html=True)
-                                for suggestion in analysis.get(
-                                    'contact_suggestions', []):
-                                    st.markdown(
-    f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>",
-     unsafe_allow_html=True)
-                                st.markdown(
-    "</ul></div>", unsafe_allow_html=True)
+# Summary Section
+if analysis.get('summary_suggestions'):
+    st.markdown("""
+    <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+        <h3 style='color: #4CAF50; margin-bottom: 10px;'>📝 Professional Summary</h3>
+        <ul style='list-style-type: none; padding-left: 0;'>
+    """, unsafe_allow_html=True)
+    for suggestion in analysis.get('summary_suggestions', []):
+        st.markdown(f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>", unsafe_allow_html=True)
+    st.markdown("</ul></div>", unsafe_allow_html=True)
 
-                            # Summary Section
-                        if analysis.get('summary_suggestions'):
-                                st.markdown("""
-                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-                                    <h3 style='color: #4CAF50; margin-bottom: 10px;'>📝 Professional Summary</h3>
-                                    <ul style='list-style-type: none; padding-left: 0;'>
-                                """, unsafe_allow_html=True)
-                                for suggestion in analysis.get(
-                                    'summary_suggestions', []):
-                                    st.markdown(
-    f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>",
-     unsafe_allow_html=True)
-                                st.markdown(
-    "</ul></div>", unsafe_allow_html=True)
+# Skills Section
+if analysis.get('skills_suggestions') or analysis.get('keyword_match', {}).get('missing_skills'):
+    st.markdown("""
+    <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+        <h3 style='color: #4CAF50; margin-bottom: 10px;'>🎯 Skills</h3>
+        <ul style='list-style-type: none; padding-left: 0;'>
+    """, unsafe_allow_html=True)
+    for suggestion in analysis.get('skills_suggestions', []):
+        st.markdown(f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>", unsafe_allow_html=True)
+    if analysis.get('keyword_match', {}).get('missing_skills'):
+        st.markdown("<li style='margin-bottom: 8px;'>✓ Consider adding these relevant skills:</li>", unsafe_allow_html=True)
+        for skill in analysis['keyword_match']['missing_skills']:
+            st.markdown(f"<li style='margin-left: 20px; margin-bottom: 4px;'>• {skill}</li>", unsafe_allow_html=True)
+    st.markdown("</ul></div>", unsafe_allow_html=True)
 
-                            # Skills Section
-                        if analysis.get(
-                            'skills_suggestions') or analysis['keyword_match']['missing_skills']:
-                                st.markdown("""
-                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-                                    <h3 style='color: #4CAF50; margin-bottom: 10px;'>🎯 Skills</h3>
-                                    <ul style='list-style-type: none; padding-left: 0;'>
-                                """, unsafe_allow_html=True)
-                                for suggestion in analysis.get(
-                                    'skills_suggestions', []):
-                                    st.markdown(
-    f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>",
-     unsafe_allow_html=True)
-                                if analysis['keyword_match']['missing_skills']:
-                                    st.markdown(
-    "<li style='margin-bottom: 8px;'>✓ Consider adding these relevant skills:</li>",
-     unsafe_allow_html=True)
-                                    for skill in analysis['keyword_match']['missing_skills']:
-                                        st.markdown(
-    f"<li style='margin-left: 20px; margin-bottom: 4px;'>• {skill}</li>",
-     unsafe_allow_html=True)
-                                st.markdown(
-    "</ul></div>", unsafe_allow_html=True)
+# Experience Section
+if analysis.get('experience_suggestions'):
+    st.markdown("""
+    <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+        <h3 style='color: #4CAF50; margin-bottom: 10px;'>💼 Work Experience</h3>
+        <ul style='list-style-type: none; padding-left: 0;'>
+    """, unsafe_allow_html=True)
+    for suggestion in analysis.get('experience_suggestions', []):
+        st.markdown(f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>", unsafe_allow_html=True)
+    st.markdown("</ul></div>", unsafe_allow_html=True)
 
-                            # Experience Section
-                        if analysis.get('experience_suggestions'):
-                                st.markdown("""
-                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-                                    <h3 style='color: #4CAF50; margin-bottom: 10px;'>💼 Work Experience</h3>
-                                    <ul style='list-style-type: none; padding-left: 0;'>
-                                """, unsafe_allow_html=True)
-                                for suggestion in analysis.get(
-                                    'experience_suggestions', []):
-                                    st.markdown(
-    f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>",
-     unsafe_allow_html=True)
-                                st.markdown(
-    "</ul></div>", unsafe_allow_html=True)
+# Education Section
+if analysis.get('education_suggestions'):
+    st.markdown("""
+    <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+        <h3 style='color: #4CAF50; margin-bottom: 10px;'>🎓 Education</h3>
+        <ul style='list-style-type: none; padding-left: 0;'>
+    """, unsafe_allow_html=True)
+    for suggestion in analysis.get('education_suggestions', []):
+        st.markdown(f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>", unsafe_allow_html=True)
+    st.markdown("</ul></div>", unsafe_allow_html=True)
 
-                            # Education Section
-                        if analysis.get('education_suggestions'):
-                                st.markdown("""
-                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-                                    <h3 style='color: #4CAF50; margin-bottom: 10px;'>🎓 Education</h3>
-                                    <ul style='list-style-type: none; padding-left: 0;'>
-                                """, unsafe_allow_html=True)
-                                for suggestion in analysis.get(
-                                    'education_suggestions', []):
-                                    st.markdown(
-    f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>",
-     unsafe_allow_html=True)
-                                st.markdown(
-    "</ul></div>", unsafe_allow_html=True)
+# General Formatting Suggestions
+if analysis.get('format_suggestions'):
+    st.markdown("""
+    <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+        <h3 style='color: #4CAF50; margin-bottom: 10px;'>📄 Formatting</h3>
+        <ul style='list-style-type: none; padding-left: 0;'>
+    """, unsafe_allow_html=True)
+    for suggestion in analysis.get('format_suggestions', []):
+        st.markdown(f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>", unsafe_allow_html=True)
+    st.markdown("</ul></div>", unsafe_allow_html=True)
 
-                            # General Formatting Suggestions
-                        if analysis.get('format_suggestions'):
-                                st.markdown("""
-                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-                                    <h3 style='color: #4CAF50; margin-bottom: 10px;'>📄 Formatting</h3>
-                                    <ul style='list-style-type: none; padding-left: 0;'>
-                                """, unsafe_allow_html=True)
-                                for suggestion in analysis.get(
-                                    'format_suggestions', []):
-                                    st.markdown(
-    f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>",
-     unsafe_allow_html=True)
-                                st.markdown(
-    "</ul></div>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
-                        st.markdown("</div>", unsafe_allow_html=True)
+# Course Recommendations
+st.markdown("""
+<div class="feature-card">
+    <h2>📚 Recommended Courses</h2>
+""", unsafe_allow_html=True)
 
-                        # Course Recommendations
-                    st.markdown("""
-                        <div class="feature-card">
-                            <h2>📚 Recommended Courses</h2>
-                        """, unsafe_allow_html=True)
+# Get courses based on role and category
+courses = get_courses_for_role(selected_role)
+if not courses:
+    category = get_category_for_role(selected_role)
+    courses = COURSES_BY_CATEGORY.get(category, {}).get(selected_role, [])
 
-                        # Get courses based on role and category
-                    courses = get_courses_for_role(selected_role)
-                    if not courses:
-                            category = get_category_for_role(selected_role)
-                            courses = COURSES_BY_CATEGORY.get(
-                                category, {}).get(selected_role, [])
+# Display courses in a grid
+cols = st.columns(2)
+for i, course in enumerate(courses[:6]):  # Show top 6 courses
+    with cols[i % 2]:
+        st.markdown(f"""
+        <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+            <h4>{course[0]}</h4>
+            <a href='{course[1]}' target='_blank'>View Course</a>
+        </div>
+        """, unsafe_allow_html=True)
 
-                        # Display courses in a grid
-                    cols = st.columns(2)
-                    for i, course in enumerate(
-                        courses[:6]):  # Show top 6 courses
-                            with cols[i % 2]:
-                                st.markdown(f"""
-                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-                                    <h4>{course[0]}</h4>
-                                    <a href='{course[1]}' target='_blank'>View Course</a>
-                                </div>
-                                """, unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
-                    st.markdown("</div>", unsafe_allow_html=True)
+# Learning Resources
+st.markdown("""
+<div class="feature-card">
+    <h2>📺 Helpful Videos</h2>
+""", unsafe_allow_html=True)
 
-                        # Learning Resources
-                    st.markdown("""
-                        <div class="feature-card">
-                            <h2>📺 Helpful Videos</h2>
-                        """, unsafe_allow_html=True)
+tab1, tab2 = st.tabs(["Resume Tips", "Interview Tips"])
 
-                    tab1, tab2 = st.tabs(["Resume Tips", "Interview Tips"])
+with tab1:
+    # Resume Videos
+    for category, videos in RESUME_VIDEOS.items():
+        st.subheader(category)
+        cols = st.columns(2)
+        for i, video in enumerate(videos):
+            with cols[i % 2]:
+                st.video(video[1])
 
-                    with tab1:
-                            # Resume Videos
-                            for category, videos in RESUME_VIDEOS.items():
-                                st.subheader(category)
-                                cols = st.columns(2)
-                                for i, video in enumerate(videos):
-                                    with cols[i % 2]:
-                                        st.video(video[1])
+with tab2:
+    # Interview Videos
+    for category, videos in INTERVIEW_VIDEOS.items():
+        st.subheader(category)
+        cols = st.columns(2)
+        for i, video in enumerate(videos):
+            with cols[i % 2]:
+                st.video(video[1])
 
-                    with tab2:
-                            # Interview Videos
-                            for category, videos in INTERVIEW_VIDEOS.items():
-                                st.subheader(category)
-                                cols = st.columns(2)
-                                for i, video in enumerate(videos):
-                                    with cols[i % 2]:
-                                        st.video(video[1])
+st.markdown("</div>", unsafe_allow_html=True)
 
-                    st.markdown("</div>", unsafe_allow_html=True)
-
-        with analyzer_tabs[1]:
-            st.markdown("""
-            <div style='background-color: #1e1e1e; padding: 20px; border-radius: 10px; margin: 10px 0;'>
-                <h3>AI-Powered Resume Analysis</h3>
-                <p>Get detailed insights from advanced AI models that analyze your resume and provide personalized recommendations.</p>
-                <p><strong>Upload your resume to get AI-powered analysis and recommendations.</strong></p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            # AI Model Selection
-            ai_model = st.selectbox(
-                "Select AI Model",
-                ["Google Gemini"],
-                help="Choose the AI model to analyze your resume"
-            )
-             
-            # Add job description input option
-            use_custom_job_desc = st.checkbox("Use custom job description", value=False, 
-                                             help="Enable this to provide a specific job description for more targeted analysis")
-            
-            custom_job_description = ""
-            if use_custom_job_desc:
-                custom_job_description = st.text_area(
-                    "Paste the job description here",
-                    height=200,
-                    placeholder="Paste the full job description from the company here for more targeted analysis...",
-                    help="Providing the actual job description will help the AI analyze your resume specifically for this position"
-                )
-                
-                st.markdown("""
-                <div style='background-color: #2e7d32; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-                    <p><i class="fas fa-lightbulb"></i> <strong>Pro Tip:</strong> Including the actual job description significantly improves the accuracy of the analysis and provides more relevant recommendations tailored to the specific position.</p>
-                </div>
-                """, unsafe_allow_html=True)
-             
-                        # Add AI Analyzer Stats in an expander
-            with st.expander("📊 AI Analyzer Statistics", expanded=False):
-                try:
-                    # Add a reset button for admin users
-                    if st.session_state.get('is_admin', False):
-                        if st.button(
-    "🔄 Reset AI Analysis Statistics",
-    type="secondary",
-     key="reset_ai_stats_button_2"):
-                            from config.database import reset_ai_analysis_stats
-                            result = reset_ai_analysis_stats()
-                            if result["success"]:
-                                st.success(result["message"])
-                            else:
-                                st.error(result["message"])
-                            # Refresh the page to show updated stats
-                            st.experimental_rerun()
-
-                    # Get detailed AI analysis statistics
-                    from config.database import get_detailed_ai_analysis_stats
-                    ai_stats = get_detailed_ai_analysis_stats()
 
                     if ai_stats["total_analyses"] > 0:
                         # Create a more visually appealing layout
