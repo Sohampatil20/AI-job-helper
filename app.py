@@ -1369,16 +1369,18 @@ class ResumeApp:
                             st.error(f"Error saving to database: {str(e)}")
                             print(f"Database error: {e}")
 
-                        # Show results based on document type
-                        if analysis.get('document_type') != 'resume':
-                            st.error(
-    f"⚠️ This appears to be a {
-        analysis['document_type']} document, not a resume!")
-                            st.warning(
-                                "Please upload a proper resume for ATS analysis.")
-                            return
-                        # Display results in a modern card layout
-                    col1, col2 = st.columns(2)
+                       # Show results based on document type
+if analysis.get('document_type') != 'resume':
+    st.error(
+        f"⚠️ This appears to be a {analysis['document_type']} document, not a resume!"
+    )
+    st.warning(
+        "Please upload a proper resume for ATS analysis."
+    )
+    return
+
+# Display results in a modern card layout
+col1, col2 = st.columns(2)
 
                     with col1:
                         # ATS Score Card with circular progress
