@@ -1,11 +1,16 @@
-﻿import time
+import time
 from PIL import Image
 from jobs.job_search import render_job_search
 from datetime import datetime
 from ui_components import (
-    apply_modern_styles, hero_section, feature_card, about_section,
-    page_header, render_analytics_section, render_activity_section,
-    render_suggestions_section
+    apply_modern_styles,
+    hero_section,
+    feature_card,
+    about_section,
+    page_header,
+    render_analytics_section,
+    render_activity_section,
+    render_suggestions_section,
 )
 from feedback.feedback import FeedbackManager
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -17,12 +22,25 @@ import plotly.graph_objects as go
 from streamlit_lottie import st_lottie
 import requests
 from dashboard.dashboard import DashboardManager
-from config.courses import COURSES_BY_CATEGORY, RESUME_VIDEOS, INTERVIEW_VIDEOS, get_courses_for_role, get_category_for_role
+from config.courses import (
+    COURSES_BY_CATEGORY,
+    RESUME_VIDEOS,
+    INTERVIEW_VIDEOS,
+    get_courses_for_role,
+    get_category_for_role,
+)
 from config.job_roles import JOB_ROLES
 from config.database import (
-    get_database_connection, save_resume_data, save_analysis_data,
-    init_database, verify_admin, log_admin_action, save_ai_analysis_data,
-    get_ai_analysis_stats, reset_ai_analysis_stats, get_detailed_ai_analysis_stats
+    get_database_connection,
+    save_resume_data,
+    save_analysis_data,
+    init_database,
+    verify_admin,
+    log_admin_action,
+    save_ai_analysis_data,
+    get_ai_analysis_stats,
+    reset_ai_analysis_stats,
+    get_detailed_ai_analysis_stats,
 )
 from utils.ai_resume_analyzer import AIResumeAnalyzer
 from utils.resume_builder import ResumeBuilder
@@ -36,43 +54,41 @@ import streamlit as st
 
 # Set page config at the very beginning
 st.set_page_config(
-    page_title="AI job Resume Analyzer & Builder",
-    page_icon="🚀",
-    layout="wide"
+    page_title="AI job Resume Analyzer & Builder", page_icon="🚀", layout="wide"
 )
 
 
 class ResumeApp:
     def __init__(self):
         """Initialize the application"""
-        if 'form_data' not in st.session_state:
+        if "form_data" not in st.session_state:
             st.session_state.form_data = {
-                'personal_info': {
-                    'full_name': '',
-                    'email': '',
-                    'phone': '',
-                    'location': '',
-                    'linkedin': '',
-                    'portfolio': ''
+                "personal_info": {
+                    "full_name": "",
+                    "email": "",
+                    "phone": "",
+                    "location": "",
+                    "linkedin": "",
+                    "portfolio": "",
                 },
-                'summary': '',
-                'experiences': [],
-                'education': [],
-                'projects': [],
-                'skills_categories': {
-                    'technical': [],
-                    'soft': [],
-                    'languages': [],
-                    'tools': []
-                }
+                "summary": "",
+                "experiences": [],
+                "education": [],
+                "projects": [],
+                "skills_categories": {
+                    "technical": [],
+                    "soft": [],
+                    "languages": [],
+                    "tools": [],
+                },
             }
 
         # Initialize navigation state
-        if 'page' not in st.session_state:
-            st.session_state.page = 'home'
+        if "page" not in st.session_state:
+            st.session_state.page = "home"
 
         # Initialize admin state
-        if 'is_admin' not in st.session_state:
+        if "is_admin" not in st.session_state:
             st.session_state.is_admin = False
 
         self.pages = {
@@ -93,31 +109,34 @@ class ResumeApp:
         self.job_roles = JOB_ROLES
 
         # Initialize session state
-        if 'user_id' not in st.session_state:
-            st.session_state.user_id = 'default_user'
-        if 'selected_role' not in st.session_state:
+        if "user_id" not in st.session_state:
+            st.session_state.user_id = "default_user"
+        if "selected_role" not in st.session_state:
             st.session_state.selected_role = None
 
         # Initialize database
         init_database()
 
         # Load external CSS
-        with open('style/style.css') as f:
-            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+        with open("style/style.css") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
         # Load Google Fonts
-        st.markdown("""
+        st.markdown(
+            """
             <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
-        if 'resume_data' not in st.session_state:
+        if "resume_data" not in st.session_state:
             st.session_state.resume_data = []
-        if 'ai_analysis_stats' not in st.session_state:
+        if "ai_analysis_stats" not in st.session_state:
             st.session_state.ai_analysis_stats = {
-                'score_distribution': {},
-                'total_analyses': 0,
-                'average_score': 0
+                "score_distribution": {},
+                "total_analyses": 0,
+                "average_score": 0,
             }
 
     def load_lottie_url(self, url: str):
@@ -128,7 +147,8 @@ class ResumeApp:
         return r.json()
 
     def apply_global_styles(self):
-        st.markdown("""
+        st.markdown(
+            """
         <style>
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
@@ -458,9 +478,9 @@ class ResumeApp:
             }
         }
         </style>
-        """, unsafe_allow_html=True)
-        
-   
+        """,
+            unsafe_allow_html=True,
+        )
 
     def load_image(self, image_name):
         """Load image from static directory"""
@@ -497,8 +517,8 @@ class ResumeApp:
 
             # Create Excel writer object
             output = io.BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                df.to_excel(writer, index=False, sheet_name='Resume Data')
+            with pd.ExcelWriter(output, engine="openpyxl") as writer:
+                df.to_excel(writer, index=False, sheet_name="Resume Data")
 
             return output.getvalue()
         except Exception as e:
@@ -517,7 +537,7 @@ class ResumeApp:
                 label="📥 Download Resume Data as Excel",
                 data=excel_data,
                 file_name=f"resume_data_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
 
     def render_empty_state(self, icon, message):
@@ -537,22 +557,21 @@ class ResumeApp:
 
     def handle_resume_upload(self):
         """Handle resume upload and analysis"""
-        uploaded_file = st.file_uploader(
-            "Upload your resume", type=['pdf', 'docx'])
+        uploaded_file = st.file_uploader("Upload your resume", type=["pdf", "docx"])
 
         if uploaded_file is not None:
             try:
                 # Extract text from resume
                 if uploaded_file.type == "application/pdf":
-                    resume_text = extract_text_from_pdf(uploaded_file)
+                    resume_text = self.analyzer.extract_text_from_pdf(uploaded_file)
                 else:
-                    resume_text = extract_text_from_docx(uploaded_file)
+                    resume_text = self.analyzer.extract_text_from_docx(uploaded_file)
 
                 # Store resume data
                 st.session_state.resume_data = {
-                    'filename': uploaded_file.name,
-                    'content': resume_text,
-                    'upload_time': datetime.now().isoformat()
+                    "filename": uploaded_file.name,
+                    "content": resume_text,
+                    "upload_time": datetime.now().isoformat(),
                 }
 
                 # Analyze resume
@@ -570,8 +589,7 @@ class ResumeApp:
 
         # Template selection
         template_options = ["Modern", "Professional", "Minimal", "Creative"]
-        selected_template = st.selectbox(
-    "Select Resume Template", template_options)
+        selected_template = st.selectbox("Select Resume Template", template_options)
         st.success(f"🎨 Currently using: {selected_template} Template")
 
         # Personal Information
@@ -580,289 +598,326 @@ class ResumeApp:
         col1, col2 = st.columns(2)
         with col1:
             # Get existing values from session state
-            existing_name = st.session_state.form_data['personal_info']['full_name']
-            existing_email = st.session_state.form_data['personal_info']['email']
-            existing_phone = st.session_state.form_data['personal_info']['phone']
+            existing_name = st.session_state.form_data["personal_info"]["full_name"]
+            existing_email = st.session_state.form_data["personal_info"]["email"]
+            existing_phone = st.session_state.form_data["personal_info"]["phone"]
 
             # Input fields with existing values
             full_name = st.text_input("Full Name", value=existing_name)
-            email = st.text_input(
-    "Email",
-    value=existing_email,
-     key="email_input")
+            email = st.text_input("Email", value=existing_email, key="email_input")
             phone = st.text_input("Phone", value=existing_phone)
 
             # Immediately update session state after email input
-            if 'email_input' in st.session_state:
-                st.session_state.form_data['personal_info']['email'] = st.session_state.email_input
+            if "email_input" in st.session_state:
+                st.session_state.form_data["personal_info"][
+                    "email"
+                ] = st.session_state.email_input
 
         with col2:
             # Get existing values from session state
-            existing_location = st.session_state.form_data['personal_info']['location']
-            existing_linkedin = st.session_state.form_data['personal_info']['linkedin']
-            existing_portfolio = st.session_state.form_data['personal_info']['portfolio']
+            existing_location = st.session_state.form_data["personal_info"]["location"]
+            existing_linkedin = st.session_state.form_data["personal_info"]["linkedin"]
+            existing_portfolio = st.session_state.form_data["personal_info"][
+                "portfolio"
+            ]
 
             # Input fields with existing values
             location = st.text_input("Location", value=existing_location)
             linkedin = st.text_input("LinkedIn URL", value=existing_linkedin)
-            portfolio = st.text_input(
-    "Portfolio Website", value=existing_portfolio)
+            portfolio = st.text_input("Portfolio Website", value=existing_portfolio)
 
         # Update personal info in session state
-        st.session_state.form_data['personal_info'] = {
-            'full_name': full_name,
-            'email': email,
-            'phone': phone,
-            'location': location,
-            'linkedin': linkedin,
-            'portfolio': portfolio
+        st.session_state.form_data["personal_info"] = {
+            "full_name": full_name,
+            "email": email,
+            "phone": phone,
+            "location": location,
+            "linkedin": linkedin,
+            "portfolio": portfolio,
         }
 
         # Professional Summary
         st.subheader("Professional Summary")
-        summary = st.text_area("Professional Summary", value=st.session_state.form_data.get('summary', ''), height=150,
-                             help="Write a brief summary highlighting your key skills and experience")
+        summary = st.text_area(
+            "Professional Summary",
+            value=st.session_state.form_data.get("summary", ""),
+            height=150,
+            help="Write a brief summary highlighting your key skills and experience",
+        )
 
         # Experience Section
         st.subheader("Work Experience")
-        if 'experiences' not in st.session_state.form_data:
-            st.session_state.form_data['experiences'] = []
+        if "experiences" not in st.session_state.form_data:
+            st.session_state.form_data["experiences"] = []
 
         if st.button("Add Experience"):
-            st.session_state.form_data['experiences'].append({
-                'company': '',
-                'position': '',
-                'start_date': '',
-                'end_date': '',
-                'description': '',
-                'responsibilities': [],
-                'achievements': []
-            })
+            st.session_state.form_data["experiences"].append(
+                {
+                    "company": "",
+                    "position": "",
+                    "start_date": "",
+                    "end_date": "",
+                    "description": "",
+                    "responsibilities": [],
+                    "achievements": [],
+                }
+            )
 
-        for idx, exp in enumerate(st.session_state.form_data['experiences']):
+        for idx, exp in enumerate(st.session_state.form_data["experiences"]):
             with st.expander(f"Experience {idx + 1}", expanded=True):
                 col1, col2 = st.columns(2)
                 with col1:
-                    exp['company'] = st.text_input(
-    "Company Name",
-    key=f"company_{idx}",
-    value=exp.get(
-        'company',
-         ''))
-                    exp['position'] = st.text_input(
-    "Position", key=f"position_{idx}", value=exp.get(
-        'position', ''))
+                    exp["company"] = st.text_input(
+                        "Company Name",
+                        key=f"company_{idx}",
+                        value=exp.get("company", ""),
+                    )
+                    exp["position"] = st.text_input(
+                        "Position", key=f"position_{idx}", value=exp.get("position", "")
+                    )
                 with col2:
-                    exp['start_date'] = st.text_input(
-    "Start Date", key=f"start_date_{idx}", value=exp.get(
-        'start_date', ''))
-                    exp['end_date'] = st.text_input(
-    "End Date", key=f"end_date_{idx}", value=exp.get(
-        'end_date', ''))
+                    exp["start_date"] = st.text_input(
+                        "Start Date",
+                        key=f"start_date_{idx}",
+                        value=exp.get("start_date", ""),
+                    )
+                    exp["end_date"] = st.text_input(
+                        "End Date", key=f"end_date_{idx}", value=exp.get("end_date", "")
+                    )
 
-                exp['description'] = st.text_area("Role Overview", key=f"desc_{idx}",
-                                                value=exp.get(
-                                                    'description', ''),
-                                                help="Brief overview of your role and impact")
+                exp["description"] = st.text_area(
+                    "Role Overview",
+                    key=f"desc_{idx}",
+                    value=exp.get("description", ""),
+                    help="Brief overview of your role and impact",
+                )
 
                 # Responsibilities
                 st.markdown("##### Key Responsibilities")
-                resp_text = st.text_area("Enter responsibilities (one per line)",
-                                       key=f"resp_{idx}",
-                                       value='\n'.join(
-                                           exp.get('responsibilities', [])),
-                                       height=100,
-                                       help="List your main responsibilities, one per line")
-                exp['responsibilities'] = [r.strip()
-                                                   for r in resp_text.split('\n') if r.strip()]
+                resp_text = st.text_area(
+                    "Enter responsibilities (one per line)",
+                    key=f"resp_{idx}",
+                    value="\n".join(exp.get("responsibilities", [])),
+                    height=100,
+                    help="List your main responsibilities, one per line",
+                )
+                exp["responsibilities"] = [
+                    r.strip() for r in resp_text.split("\n") if r.strip()
+                ]
 
                 # Achievements
                 st.markdown("##### Key Achievements")
-                achv_text = st.text_area("Enter achievements (one per line)",
-                                       key=f"achv_{idx}",
-                                       value='\n'.join(
-                                           exp.get('achievements', [])),
-                                       height=100,
-                                       help="List your notable achievements, one per line")
-                exp['achievements'] = [a.strip()
-                                               for a in achv_text.split('\n') if a.strip()]
+                achv_text = st.text_area(
+                    "Enter achievements (one per line)",
+                    key=f"achv_{idx}",
+                    value="\n".join(exp.get("achievements", [])),
+                    height=100,
+                    help="List your notable achievements, one per line",
+                )
+                exp["achievements"] = [
+                    a.strip() for a in achv_text.split("\n") if a.strip()
+                ]
 
                 if st.button("Remove Experience", key=f"remove_exp_{idx}"):
-                    st.session_state.form_data['experiences'].pop(idx)
+                    st.session_state.form_data["experiences"].pop(idx)
                     st.rerun()
 
         # Projects Section
         st.subheader("Projects")
-        if 'projects' not in st.session_state.form_data:
-            st.session_state.form_data['projects'] = []
+        if "projects" not in st.session_state.form_data:
+            st.session_state.form_data["projects"] = []
 
         if st.button("Add Project"):
-            st.session_state.form_data['projects'].append({
-                'name': '',
-                'technologies': '',
-                'description': '',
-                'responsibilities': [],
-                'achievements': [],
-                'link': ''
-            })
+            st.session_state.form_data["projects"].append(
+                {
+                    "name": "",
+                    "technologies": "",
+                    "description": "",
+                    "responsibilities": [],
+                    "achievements": [],
+                    "link": "",
+                }
+            )
 
-        for idx, proj in enumerate(st.session_state.form_data['projects']):
+        for idx, proj in enumerate(st.session_state.form_data["projects"]):
             with st.expander(f"Project {idx + 1}", expanded=True):
-                proj['name'] = st.text_input(
-    "Project Name",
-    key=f"proj_name_{idx}",
-    value=proj.get(
-        'name',
-         ''))
-                proj['technologies'] = st.text_input("Technologies Used", key=f"proj_tech_{idx}",
-                                                   value=proj.get(
-                                                       'technologies', ''),
-                                                   help="List the main technologies, frameworks, and tools used")
+                proj["name"] = st.text_input(
+                    "Project Name", key=f"proj_name_{idx}", value=proj.get("name", "")
+                )
+                proj["technologies"] = st.text_input(
+                    "Technologies Used",
+                    key=f"proj_tech_{idx}",
+                    value=proj.get("technologies", ""),
+                    help="List the main technologies, frameworks, and tools used",
+                )
 
-                proj['description'] = st.text_area("Project Overview", key=f"proj_desc_{idx}",
-                                                 value=proj.get(
-                                                     'description', ''),
-                                                 help="Brief overview of the project and its goals")
+                proj["description"] = st.text_area(
+                    "Project Overview",
+                    key=f"proj_desc_{idx}",
+                    value=proj.get("description", ""),
+                    help="Brief overview of the project and its goals",
+                )
 
                 # Project Responsibilities
                 st.markdown("##### Key Responsibilities")
-                proj_resp_text = st.text_area("Enter responsibilities (one per line)",
-                                            key=f"proj_resp_{idx}",
-                                            value='\n'.join(
-                                                proj.get('responsibilities', [])),
-                                            height=100,
-                                            help="List your main responsibilities in the project")
-                proj['responsibilities'] = [r.strip()
-                                                    for r in proj_resp_text.split('\n') if r.strip()]
+                proj_resp_text = st.text_area(
+                    "Enter responsibilities (one per line)",
+                    key=f"proj_resp_{idx}",
+                    value="\n".join(proj.get("responsibilities", [])),
+                    height=100,
+                    help="List your main responsibilities in the project",
+                )
+                proj["responsibilities"] = [
+                    r.strip() for r in proj_resp_text.split("\n") if r.strip()
+                ]
 
                 # Project Achievements
                 st.markdown("##### Key Achievements")
-                proj_achv_text = st.text_area("Enter achievements (one per line)",
-                                            key=f"proj_achv_{idx}",
-                                            value='\n'.join(
-                                                proj.get('achievements', [])),
-                                            height=100,
-                                            help="List the project's key achievements and your contributions")
-                proj['achievements'] = [a.strip()
-                                                for a in proj_achv_text.split('\n') if a.strip()]
+                proj_achv_text = st.text_area(
+                    "Enter achievements (one per line)",
+                    key=f"proj_achv_{idx}",
+                    value="\n".join(proj.get("achievements", [])),
+                    height=100,
+                    help="List the project's key achievements and your contributions",
+                )
+                proj["achievements"] = [
+                    a.strip() for a in proj_achv_text.split("\n") if a.strip()
+                ]
 
-                proj['link'] = st.text_input("Project Link (optional)", key=f"proj_link_{idx}",
-                                           value=proj.get('link', ''),
-                                           help="Link to the project repository, demo, or documentation")
+                proj["link"] = st.text_input(
+                    "Project Link (optional)",
+                    key=f"proj_link_{idx}",
+                    value=proj.get("link", ""),
+                    help="Link to the project repository, demo, or documentation",
+                )
 
                 if st.button("Remove Project", key=f"remove_proj_{idx}"):
-                    st.session_state.form_data['projects'].pop(idx)
+                    st.session_state.form_data["projects"].pop(idx)
                     st.rerun()
 
         # Education Section
         st.subheader("Education")
-        if 'education' not in st.session_state.form_data:
-            st.session_state.form_data['education'] = []
+        if "education" not in st.session_state.form_data:
+            st.session_state.form_data["education"] = []
 
         if st.button("Add Education"):
-            st.session_state.form_data['education'].append({
-                'school': '',
-                'degree': '',
-                'field': '',
-                'graduation_date': '',
-                'gpa': '',
-                'achievements': []
-            })
+            st.session_state.form_data["education"].append(
+                {
+                    "school": "",
+                    "degree": "",
+                    "field": "",
+                    "graduation_date": "",
+                    "gpa": "",
+                    "achievements": [],
+                }
+            )
 
-        for idx, edu in enumerate(st.session_state.form_data['education']):
+        for idx, edu in enumerate(st.session_state.form_data["education"]):
             with st.expander(f"Education {idx + 1}", expanded=True):
                 col1, col2 = st.columns(2)
                 with col1:
-                    edu['school'] = st.text_input(
-    "School/University",
-    key=f"school_{idx}",
-    value=edu.get(
-        'school',
-         ''))
-                    edu['degree'] = st.text_input(
-    "Degree", key=f"degree_{idx}", value=edu.get(
-        'degree', ''))
+                    edu["school"] = st.text_input(
+                        "School/University",
+                        key=f"school_{idx}",
+                        value=edu.get("school", ""),
+                    )
+                    edu["degree"] = st.text_input(
+                        "Degree", key=f"degree_{idx}", value=edu.get("degree", "")
+                    )
                 with col2:
-                    edu['field'] = st.text_input(
-    "Field of Study",
-    key=f"field_{idx}",
-    value=edu.get(
-        'field',
-         ''))
-                    edu['graduation_date'] = st.text_input("Graduation Date", key=f"grad_date_{idx}",
-                                                         value=edu.get('graduation_date', ''))
+                    edu["field"] = st.text_input(
+                        "Field of Study", key=f"field_{idx}", value=edu.get("field", "")
+                    )
+                    edu["graduation_date"] = st.text_input(
+                        "Graduation Date",
+                        key=f"grad_date_{idx}",
+                        value=edu.get("graduation_date", ""),
+                    )
 
-                edu['gpa'] = st.text_input(
-    "GPA (optional)",
-    key=f"gpa_{idx}",
-    value=edu.get(
-        'gpa',
-         ''))
+                edu["gpa"] = st.text_input(
+                    "GPA (optional)", key=f"gpa_{idx}", value=edu.get("gpa", "")
+                )
 
                 # Educational Achievements
                 st.markdown("##### Achievements & Activities")
-                edu_achv_text = st.text_area("Enter achievements (one per line)",
-                                           key=f"edu_achv_{idx}",
-                                           value='\n'.join(
-                                               edu.get('achievements', [])),
-                                           height=100,
-                                           help="List academic achievements, relevant coursework, or activities")
-                edu['achievements'] = [a.strip()
-                                               for a in edu_achv_text.split('\n') if a.strip()]
+                edu_achv_text = st.text_area(
+                    "Enter achievements (one per line)",
+                    key=f"edu_achv_{idx}",
+                    value="\n".join(edu.get("achievements", [])),
+                    height=100,
+                    help="List academic achievements, relevant coursework, or activities",
+                )
+                edu["achievements"] = [
+                    a.strip() for a in edu_achv_text.split("\n") if a.strip()
+                ]
 
                 if st.button("Remove Education", key=f"remove_edu_{idx}"):
-                    st.session_state.form_data['education'].pop(idx)
+                    st.session_state.form_data["education"].pop(idx)
                     st.rerun()
 
         # Skills Section
         st.subheader("Skills")
-        if 'skills_categories' not in st.session_state.form_data:
-            st.session_state.form_data['skills_categories'] = {
-                'technical': [],
-                'soft': [],
-                'languages': [],
-                'tools': []
+        if "skills_categories" not in st.session_state.form_data:
+            st.session_state.form_data["skills_categories"] = {
+                "technical": [],
+                "soft": [],
+                "languages": [],
+                "tools": [],
             }
 
         col1, col2 = st.columns(2)
         with col1:
-            tech_skills = st.text_area("Technical Skills (one per line)",
-                                     value='\n'.join(
-    st.session_state.form_data['skills_categories']['technical']),
-                                     height=150,
-                                     help="Programming languages, frameworks, databases, etc.")
-            st.session_state.form_data['skills_categories']['technical'] = [
-                s.strip() for s in tech_skills.split('\n') if s.strip()]
+            tech_skills = st.text_area(
+                "Technical Skills (one per line)",
+                value="\n".join(
+                    st.session_state.form_data["skills_categories"]["technical"]
+                ),
+                height=150,
+                help="Programming languages, frameworks, databases, etc.",
+            )
+            st.session_state.form_data["skills_categories"]["technical"] = [
+                s.strip() for s in tech_skills.split("\n") if s.strip()
+            ]
 
-            soft_skills = st.text_area("Soft Skills (one per line)",
-                                     value='\n'.join(
-    st.session_state.form_data['skills_categories']['soft']),
-                                     height=150,
-                                     help="Leadership, communication, problem-solving, etc.")
-            st.session_state.form_data['skills_categories']['soft'] = [
-                s.strip() for s in soft_skills.split('\n') if s.strip()]
+            soft_skills = st.text_area(
+                "Soft Skills (one per line)",
+                value="\n".join(
+                    st.session_state.form_data["skills_categories"]["soft"]
+                ),
+                height=150,
+                help="Leadership, communication, problem-solving, etc.",
+            )
+            st.session_state.form_data["skills_categories"]["soft"] = [
+                s.strip() for s in soft_skills.split("\n") if s.strip()
+            ]
 
         with col2:
-            languages = st.text_area("Languages (one per line)",
-                                   value='\n'.join(
-    st.session_state.form_data['skills_categories']['languages']),
-                                   height=150,
-                                   help="Programming or human languages with proficiency level")
-            st.session_state.form_data['skills_categories']['languages'] = [
-                l.strip() for l in languages.split('\n') if l.strip()]
+            languages = st.text_area(
+                "Languages (one per line)",
+                value="\n".join(
+                    st.session_state.form_data["skills_categories"]["languages"]
+                ),
+                height=150,
+                help="Programming or human languages with proficiency level",
+            )
+            st.session_state.form_data["skills_categories"]["languages"] = [
+                l.strip() for l in languages.split("\n") if l.strip()
+            ]
 
-            tools = st.text_area("Tools & Technologies (one per line)",
-                               value='\n'.join(
-    st.session_state.form_data['skills_categories']['tools']),
-                               height=150,
-                               help="Development tools, software, platforms, etc.")
-            st.session_state.form_data['skills_categories']['tools'] = [
-                t.strip() for t in tools.split('\n') if t.strip()]
+            tools = st.text_area(
+                "Tools & Technologies (one per line)",
+                value="\n".join(
+                    st.session_state.form_data["skills_categories"]["tools"]
+                ),
+                height=150,
+                help="Development tools, software, platforms, etc.",
+            )
+            st.session_state.form_data["skills_categories"]["tools"] = [
+                t.strip() for t in tools.split("\n") if t.strip()
+            ]
 
         # Update form data in session state
-        st.session_state.form_data.update({
-            'summary': summary
-        })
+        st.session_state.form_data.update({"summary": summary})
 
         # Generate Resume button
         if st.button("Generate Resume 📄", type="primary"):
@@ -871,9 +926,14 @@ class ResumeApp:
             print(f"Email input value: {st.session_state.get('email_input', '')}")
 
             # Get the current values from form
-            current_name = st.session_state.form_data['personal_info']['full_name'].strip(
+            current_name = st.session_state.form_data["personal_info"][
+                "full_name"
+            ].strip()
+            current_email = (
+                st.session_state.email_input
+                if "email_input" in st.session_state
+                else ""
             )
-            current_email = st.session_state.email_input if 'email_input' in st.session_state else ''
 
             print(f"Current name: {current_name}")
             print(f"Current email: {current_email}")
@@ -888,24 +948,22 @@ class ResumeApp:
                 return
 
             # Update email in form data one final time
-            st.session_state.form_data['personal_info']['email'] = current_email
+            st.session_state.form_data["personal_info"]["email"] = current_email
 
             try:
                 print("Preparing resume data...")
                 # Prepare resume data with current form values
                 resume_data = {
-                    "personal_info": st.session_state.form_data['personal_info'],
-                    "summary": st.session_state.form_data.get('summary', '').strip(),
-                    "experience": st.session_state.form_data.get('experiences', []),
-                    "education": st.session_state.form_data.get('education', []),
-                    "projects": st.session_state.form_data.get('projects', []),
-                    "skills": st.session_state.form_data.get('skills_categories', {
-                        'technical': [],
-                        'soft': [],
-                        'languages': [],
-                        'tools': []
-                    }),
-                    "template": selected_template
+                    "personal_info": st.session_state.form_data["personal_info"],
+                    "summary": st.session_state.form_data.get("summary", "").strip(),
+                    "experience": st.session_state.form_data.get("experiences", []),
+                    "education": st.session_state.form_data.get("education", []),
+                    "projects": st.session_state.form_data.get("projects", []),
+                    "skills": st.session_state.form_data.get(
+                        "skills_categories",
+                        {"technical": [], "soft": [], "languages": [], "tools": []},
+                    ),
+                    "template": selected_template,
                 }
 
                 print(f"Resume data prepared: {resume_data}")
@@ -929,14 +987,17 @@ class ResumeApp:
                                 data=resume_buffer,
                                 file_name=f"{current_name.replace(' ', '_')}_resume.docx",
                                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                on_click=lambda: st.balloons()
+                                on_click=lambda: st.balloons(),
                             )
                         except Exception as db_error:
-                            print(f"Warning: Failed to save to database: {str(db_error)}")
+                            print(
+                                f"Warning: Failed to save to database: {str(db_error)}"
+                            )
                             # Still allow download even if database save fails
                             st.warning(
-                                "⚠️ Resume generated but couldn't be saved to database")
-                            
+                                "⚠️ Resume generated but couldn't be saved to database"
+                            )
+
                             # Show balloons effect
                             st.balloons()
 
@@ -945,11 +1006,10 @@ class ResumeApp:
                                 data=resume_buffer,
                                 file_name=f"{current_name.replace(' ', '_')}_resume.docx",
                                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                on_click=lambda: st.balloons()
+                                on_click=lambda: st.balloons(),
                             )
                     else:
-                        st.error(
-                            "❌ Failed to generate resume. Please try again.")
+                        st.error("❌ Failed to generate resume. Please try again.")
                         print("Resume buffer was None")
                 except Exception as gen_error:
                     print(f"Error during resume generation: {str(gen_error)}")
@@ -978,16 +1038,14 @@ class ResumeApp:
                 return None
 
         # Get image path and convert to base64
-        image_path = os.path.join(
-    os.path.dirname(__file__),
-    "assets",
-     "124852522.jpeg")
+        image_path = os.path.join(os.path.dirname(__file__), "assets", "124852522.jpeg")
         image_base64 = get_image_as_base64(image_path)
 
         apply_modern_styles()
 
         # Add Font Awesome icons and custom CSS
-        st.markdown("""
+        st.markdown(
+            """
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
             <style>
                 .profile-section, .vision-section, .feature-card {
@@ -1109,18 +1167,24 @@ class ResumeApp:
                     line-height: 1.6;
                 }
             </style>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
         # Hero Section
-        st.markdown("""
+        st.markdown(
+            """
             <div class="hero-section">
                 <h1 class="hero-title">About Smart Resume AI</h1>
                 <p class="hero-subtitle">A powerful AI-driven platform for optimizing your resume</p>
             </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
         # Profile Section
-        st.markdown(f"""
+        st.markdown(
+            f"""
             <div class="profile-section">
                 <img src="{image_base64 if image_base64 else 'https://avatars.githubusercontent.com/Hunterdii'}"
                      alt="Het Patel"
@@ -1146,13 +1210,13 @@ class ResumeApp:
                     provide intelligent, data-driven insights for resume optimization.
                 </p>
             </div>
-        """, unsafe_allow_html=True)
-
-
-
+        """,
+            unsafe_allow_html=True,
+        )
 
         # Vision Section
-        st.markdown("""
+        st.markdown(
+            """
             <div class="vision-section">
                 <i class="fas fa-lightbulb vision-icon"></i>
                 <h2 class="vision-title">Our Vision</h2>
@@ -1162,10 +1226,13 @@ class ResumeApp:
                     every career stage to showcase their true potential and stand out in today's competitive job market."
                 </p>
             </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
         # Features Section
-        st.markdown("""
+        st.markdown(
+            """
             <div class="features-grid">
                 <div class="feature-card">
                     <i class="fas fa-robot feature-icon"></i>
@@ -1195,7 +1262,9 @@ class ResumeApp:
                     <i class="fas fa-arrow-right" style="margin-left: 10px;"></i>
                 </a>
             </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
     def render_analyzer(self):
         """Render the resume analyzer page"""
@@ -1203,8 +1272,7 @@ class ResumeApp:
 
         # Page Header
         page_header(
-            "Resume Analyzer",
-            "Get instant AI-powered feedback to optimize your resume"
+            "Resume Analyzer", "Get instant AI-powered feedback to optimize your resume"
         )
 
         # Create tabs for Normal Analyzer and AI Analyzer
@@ -1214,42 +1282,46 @@ class ResumeApp:
             # Job Role Selection
             categories = list(self.job_roles.keys())
             selected_category = st.selectbox(
-    "Job Category", categories, key="standard_category")
+                "Job Category", categories, key="standard_category"
+            )
 
             roles = list(self.job_roles[selected_category].keys())
-            selected_role = st.selectbox(
-    "Specific Role", roles, key="standard_role")
+            selected_role = st.selectbox("Specific Role", roles, key="standard_role")
 
             role_info = self.job_roles[selected_category][selected_role]
 
             # Display role information
-            st.markdown(f"""
+            st.markdown(
+                f"""
             <div style='background-color: #1e1e1e; padding: 20px; border-radius: 10px; margin: 10px 0;'>
                 <h3>{selected_role}</h3>
                 <p>{role_info['description']}</p>
                 <h4>Required Skills:</h4>
                 <p>{', '.join(role_info['required_skills'])}</p>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
             # File Upload
             uploaded_file = st.file_uploader(
-    "Upload your resume", type=[
-        'pdf', 'docx'], key="standard_file")
+                "Upload your resume", type=["pdf", "docx"], key="standard_file"
+            )
 
             if not uploaded_file:
                 # Display empty state with a prominent upload button
                 st.markdown(
                     self.render_empty_state(
-                    "fas fa-cloud-upload-alt",
-                    "Upload your resume to get started with standard analysis"
+                        "fas fa-cloud-upload-alt",
+                        "Upload your resume to get started with standard analysis",
                     ),
-                    unsafe_allow_html=True
+                    unsafe_allow_html=True,
                 )
                 # Add a prominent upload button
                 col1, col2, col3 = st.columns([1, 2, 1])
                 with col2:
-                    st.markdown("""
+                    st.markdown(
+                        """
                     <style>
                     .upload-button {
                         background: linear-gradient(90deg, #4b6cb7, #182848);
@@ -1271,14 +1343,18 @@ class ResumeApp:
                         box-shadow: 0 6px 15px rgba(0,0,0,0.3);
                     }
 
-                    """, unsafe_allow_html=True)
+                    """,
+                        unsafe_allow_html=True,
+                    )
 
             if uploaded_file:
                 # Add a prominent analyze button
-                analyze_standard = st.button("🔍 Analyze My Resume",
-                                    type="primary",
-                                    use_container_width=True,
-                                    key="analyze_standard_button")
+                analyze_standard = st.button(
+                    "🔍 Analyze My Resume",
+                    type="primary",
+                    use_container_width=True,
+                    key="analyze_standard_button",
+                )
 
                 if analyze_standard:
                     with st.spinner("Analyzing your document..."):
@@ -1287,43 +1363,66 @@ class ResumeApp:
                         try:
                             if uploaded_file.type == "application/pdf":
                                 try:
-                                    text = self.analyzer.extract_text_from_pdf(uploaded_file)
+                                    text = self.analyzer.extract_text_from_pdf(
+                                        uploaded_file
+                                    )
                                 except Exception as pdf_error:
                                     st.error(f"PDF extraction failed: {str(pdf_error)}")
-                                    st.info("Trying alternative PDF extraction method...")
+                                    st.info(
+                                        "Trying alternative PDF extraction method..."
+                                    )
                                     # Try AI analyzer as backup
                                     try:
-                                        text = self.ai_analyzer.extract_text_from_pdf(uploaded_file)
+                                        text = self.ai_analyzer.extract_text_from_pdf(
+                                            uploaded_file
+                                        )
                                     except Exception as backup_error:
-                                        st.error(f"All PDF extraction methods failed: {str(backup_error)}")
+                                        st.error(
+                                            f"All PDF extraction methods failed: {str(backup_error)}"
+                                        )
                                         return
-                            elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                            elif (
+                                uploaded_file.type
+                                == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            ):
                                 try:
-                                    text = self.analyzer.extract_text_from_docx(uploaded_file)
+                                    text = self.analyzer.extract_text_from_docx(
+                                        uploaded_file
+                                    )
                                 except Exception as docx_error:
-                                    st.error(f"DOCX extraction failed: {str(docx_error)}")
+                                    st.error(
+                                        f"DOCX extraction failed: {str(docx_error)}"
+                                    )
                                     # Try AI analyzer as backup
                                     try:
-                                        text = self.ai_analyzer.extract_text_from_docx(uploaded_file)
+                                        text = self.ai_analyzer.extract_text_from_docx(
+                                            uploaded_file
+                                        )
                                     except Exception as backup_error:
-                                        st.error(f"All DOCX extraction methods failed: {str(backup_error)}")
+                                        st.error(
+                                            f"All DOCX extraction methods failed: {str(backup_error)}"
+                                        )
                                         return
                             else:
                                 text = uploaded_file.getvalue().decode()
-                                
+
                             if not text or text.strip() == "":
-                                st.error("Could not extract any text from the uploaded file. Please try a different file.")
+                                st.error(
+                                    "Could not extract any text from the uploaded file. Please try a different file."
+                                )
                                 return
                         except Exception as e:
                             st.error(f"Error reading file: {str(e)}")
                             return
 
                         # Analyze the document
-                        analysis = self.analyzer.analyze_resume({'raw_text': text}, role_info)
-                        
+                        analysis = self.analyzer.analyze_resume(
+                            {"raw_text": text}, role_info
+                        )
+
                         # Check if analysis returned an error
-                        if 'error' in analysis:
-                            st.error(analysis['error'])
+                        if "error" in analysis:
+                            st.error(analysis["error"])
                             return
 
                         # Show snowflake effect
@@ -1331,22 +1430,22 @@ class ResumeApp:
 
                         # Save resume data to database
                         resume_data = {
-                            'personal_info': {
-                                'name': analysis.get('name', ''),
-                                'email': analysis.get('email', ''),
-                                'phone': analysis.get('phone', ''),
-                                'linkedin': analysis.get('linkedin', ''),
-                                'github': analysis.get('github', ''),
-                                'portfolio': analysis.get('portfolio', '')
+                            "personal_info": {
+                                "name": analysis.get("name", ""),
+                                "email": analysis.get("email", ""),
+                                "phone": analysis.get("phone", ""),
+                                "linkedin": analysis.get("linkedin", ""),
+                                "github": analysis.get("github", ""),
+                                "portfolio": analysis.get("portfolio", ""),
                             },
-                            'summary': analysis.get('summary', ''),
-                            'target_role': selected_role,
-                            'target_category': selected_category,
-                            'education': analysis.get('education', []),
-                            'experience': analysis.get('experience', []),
-                            'projects': analysis.get('projects', []),
-                            'skills': analysis.get('skills', []),
-                            'template': ''
+                            "summary": analysis.get("summary", ""),
+                            "target_role": selected_role,
+                            "target_category": selected_category,
+                            "education": analysis.get("education", []),
+                            "experience": analysis.get("experience", []),
+                            "projects": analysis.get("projects", []),
+                            "skills": analysis.get("skills", []),
+                            "template": "",
                         }
 
                         # Save to database
@@ -1355,13 +1454,17 @@ class ResumeApp:
 
                             # Save analysis data
                             analysis_data = {
-                                'resume_id': resume_id,
-                                'ats_score': analysis['ats_score'],
-                                'keyword_match_score': analysis['keyword_match']['score'],
-                                'format_score': analysis['format_score'],
-                                'section_score': analysis['section_score'],
-                                'missing_skills': ','.join(analysis['keyword_match']['missing_skills']),
-                                'recommendations': ','.join(analysis['suggestions'])
+                                "resume_id": resume_id,
+                                "ats_score": analysis["ats_score"],
+                                "keyword_match_score": analysis["keyword_match"][
+                                    "score"
+                                ],
+                                "format_score": analysis["format_score"],
+                                "section_score": analysis["section_score"],
+                                "missing_skills": ",".join(
+                                    analysis["keyword_match"]["missing_skills"]
+                                ),
+                                "recommendations": ",".join(analysis["suggestions"]),
                             }
                             save_analysis_data(resume_id, analysis_data)
                             st.success("Resume data saved successfully!")
@@ -1369,236 +1472,399 @@ class ResumeApp:
                             st.error(f"Error saving to database: {str(e)}")
                             print(f"Database error: {e}")
 
-                      # Show results based on document type
-if analysis.get('document_type') != 'resume':
-    st.error(
-        f"⚠️ This appears to be a {analysis['document_type']} document, not a resume!"
-    )
-    st.warning(
-        "Please upload a proper resume for ATS analysis."
-    )
-    return
+                        # Show results based on document type
+                        if analysis.get("document_type") != "resume":
+                            st.error(
+                                f"⚠️ This appears to be a {
+        analysis['document_type']} document, not a resume!"
+                            )
+                            st.warning(
+                                "Please upload a proper resume for ATS analysis."
+                            )
+                            return
+                        # Display results in a modern card layout
+                    col1, col2 = st.columns(2)
 
-# Display results in a modern card layout
-col1, col2 = st.columns(2)
+                    with col1:
+                        # ATS Score Card with circular progress
+                        st.markdown(
+                            """
+                        <div class="feature-card">
+                            <h2>ATS Score</h2>
+                            <div style="position: relative; width: 150px; height: 150px; margin: 0 auto;">
+                                <div style="
+                                    position: absolute;
+                                    width: 150px;
+                                    height: 150px;
+                                    border-radius: 50%;
+                                    background: conic-gradient(
+                                        #4CAF50 0% {score}%,
+                                        #2c2c2c {score}% 100%
+                                    );
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">
+                                    <div style="
+                                        width: 120px;
+                                        height: 120px;
+                                        background: #1a1a1a;
+                                        border-radius: 50%;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        font-size: 24px;
+                                        font-weight: bold;
+                                        color: {color};
+                                    ">
+                                        {score}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="text-align: center; margin-top: 10px;">
+                                <span style="
+                                    font-size: 1.2em;
+                                    color: {color};
+                                    font-weight: bold;
+                                ">
+                                    {status}
+                                </span>
+                            </div>
+                        """.format(
+                                score=analysis["ats_score"],
+                                color=(
+                                    "#4CAF50"
+                                    if analysis["ats_score"] >= 80
+                                    else (
+                                        "#FFA500"
+                                        if analysis["ats_score"] >= 60
+                                        else "#FF4444"
+                                    )
+                                ),
+                                status=(
+                                    "Excellent"
+                                    if analysis["ats_score"] >= 80
+                                    else (
+                                        "Good"
+                                        if analysis["ats_score"] >= 60
+                                        else "Needs Improvement"
+                                    )
+                                ),
+                            ),
+                            unsafe_allow_html=True,
+                        )
 
-with col1:
-    # ATS Score Card with circular progress
-    st.markdown("""
-    <div class="feature-card">
-        <h2>ATS Score</h2>
-        <div style="position: relative; width: 150px; height: 150px; margin: 0 auto;">
-            <div style="
-                position: absolute;
-                width: 150px;
-                height: 150px;
-                border-radius: 50%;
-                background: conic-gradient(
-                    #4CAF50 0% {score}%,
-                    #2c2c2c {score}% 100%
-                );
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            ">
-                <div style="
-                    width: 120px;
-                    height: 120px;
-                    background: #1a1a1a;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 24px;
-                    font-weight: bold;
-                    color: {color};
-                ">
-                    {score}
-                </div>
+                        st.markdown("</div>", unsafe_allow_html=True)
+
+                        # self.display_analysis_results(analysis_results)
+
+                        # Skills Match Card
+                        st.markdown(
+                            """
+                        <div class="feature-card">
+                            <h2>Skills Match</h2>
+                        """,
+                            unsafe_allow_html=True,
+                        )
+
+                        st.metric(
+                            "Keyword Match",
+                            f"{int(analysis.get('keyword_match', {}).get('score', 0))}%",
+                        )
+
+                        if analysis["keyword_match"]["missing_skills"]:
+                            st.markdown("#### Missing Skills:")
+                            for skill in analysis["keyword_match"]["missing_skills"]:
+                                st.markdown(f"- {skill}")
+
+                        st.markdown("</div>", unsafe_allow_html=True)
+
+                    with col2:
+                        # Format Score Card
+                        st.markdown(
+                            """
+                        <div class="feature-card">
+                            <h2>Format Analysis</h2>
+                        """,
+                            unsafe_allow_html=True,
+                        )
+
+                        st.metric(
+                            "Format Score", f"{int(analysis.get('format_score', 0))}%"
+                        )
+                        st.metric(
+                            "Section Score", f"{int(analysis.get('section_score', 0))}%"
+                        )
+
+                        st.markdown("</div>", unsafe_allow_html=True)
+
+                        # Suggestions Card with improved UI
+                        st.markdown(
+                            """
+                        <div class="feature-card">
+                            <h2>📋 Resume Improvement Suggestions</h2>
+                        """,
+                            unsafe_allow_html=True,
+                        )
+
+                        # Contact Section
+                        if analysis.get("contact_suggestions"):
+                            st.markdown(
+                                """
+                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+                                    <h3 style='color: #4CAF50; margin-bottom: 10px;'>📞 Contact Information</h3>
+                                    <ul style='list-style-type: none; padding-left: 0;'>
+                                """,
+                                unsafe_allow_html=True,
+                            )
+                            for suggestion in analysis.get("contact_suggestions", []):
+                                st.markdown(
+                                    f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>",
+                                    unsafe_allow_html=True,
+                                )
+                            st.markdown("</ul></div>", unsafe_allow_html=True)
+
+                        # Summary Section
+                        if analysis.get("summary_suggestions"):
+                            st.markdown(
+                                """
+                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+                                    <h3 style='color: #4CAF50; margin-bottom: 10px;'>📝 Professional Summary</h3>
+                                    <ul style='list-style-type: none; padding-left: 0;'>
+                                """,
+                                unsafe_allow_html=True,
+                            )
+                            for suggestion in analysis.get("summary_suggestions", []):
+                                st.markdown(
+                                    f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>",
+                                    unsafe_allow_html=True,
+                                )
+                            st.markdown("</ul></div>", unsafe_allow_html=True)
+
+                        # Skills Section
+                        if (
+                            analysis.get("skills_suggestions")
+                            or analysis["keyword_match"]["missing_skills"]
+                        ):
+                            st.markdown(
+                                """
+                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+                                    <h3 style='color: #4CAF50; margin-bottom: 10px;'>🎯 Skills</h3>
+                                    <ul style='list-style-type: none; padding-left: 0;'>
+                                """,
+                                unsafe_allow_html=True,
+                            )
+                            for suggestion in analysis.get("skills_suggestions", []):
+                                st.markdown(
+                                    f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>",
+                                    unsafe_allow_html=True,
+                                )
+                            if analysis["keyword_match"]["missing_skills"]:
+                                st.markdown(
+                                    "<li style='margin-bottom: 8px;'>✓ Consider adding these relevant skills:</li>",
+                                    unsafe_allow_html=True,
+                                )
+                                for skill in analysis["keyword_match"][
+                                    "missing_skills"
+                                ]:
+                                    st.markdown(
+                                        f"<li style='margin-left: 20px; margin-bottom: 4px;'>• {skill}</li>",
+                                        unsafe_allow_html=True,
+                                    )
+                            st.markdown("</ul></div>", unsafe_allow_html=True)
+
+                        # Experience Section
+                        if analysis.get("experience_suggestions"):
+                            st.markdown(
+                                """
+                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+                                    <h3 style='color: #4CAF50; margin-bottom: 10px;'>💼 Work Experience</h3>
+                                    <ul style='list-style-type: none; padding-left: 0;'>
+                                """,
+                                unsafe_allow_html=True,
+                            )
+                            for suggestion in analysis.get(
+                                "experience_suggestions", []
+                            ):
+                                st.markdown(
+                                    f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>",
+                                    unsafe_allow_html=True,
+                                )
+                            st.markdown("</ul></div>", unsafe_allow_html=True)
+
+                        # Education Section
+                        if analysis.get("education_suggestions"):
+                            st.markdown(
+                                """
+                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+                                    <h3 style='color: #4CAF50; margin-bottom: 10px;'>🎓 Education</h3>
+                                    <ul style='list-style-type: none; padding-left: 0;'>
+                                """,
+                                unsafe_allow_html=True,
+                            )
+                            for suggestion in analysis.get("education_suggestions", []):
+                                st.markdown(
+                                    f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>",
+                                    unsafe_allow_html=True,
+                                )
+                            st.markdown("</ul></div>", unsafe_allow_html=True)
+
+                        # General Formatting Suggestions
+                        if analysis.get("format_suggestions"):
+                            st.markdown(
+                                """
+                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+                                    <h3 style='color: #4CAF50; margin-bottom: 10px;'>📄 Formatting</h3>
+                                    <ul style='list-style-type: none; padding-left: 0;'>
+                                """,
+                                unsafe_allow_html=True,
+                            )
+                            for suggestion in analysis.get("format_suggestions", []):
+                                st.markdown(
+                                    f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>",
+                                    unsafe_allow_html=True,
+                                )
+                            st.markdown("</ul></div>", unsafe_allow_html=True)
+
+                        st.markdown("</div>", unsafe_allow_html=True)
+
+                        # Course Recommendations
+                    st.markdown(
+                        """
+                        <div class="feature-card">
+                            <h2>📚 Recommended Courses</h2>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+                    # Get courses based on role and category
+                    courses = get_courses_for_role(selected_role)
+                    if not courses:
+                        category = get_category_for_role(selected_role)
+                        courses = COURSES_BY_CATEGORY.get(category, {}).get(
+                            selected_role, []
+                        )
+
+                    # Display courses in a grid
+                    cols = st.columns(2)
+                    for i, course in enumerate(courses[:6]):  # Show top 6 courses
+                        with cols[i % 2]:
+                            st.markdown(
+                                f"""
+                                <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+                                    <h4>{course[0]}</h4>
+                                    <a href='{course[1]}' target='_blank'>View Course</a>
+                                </div>
+                                """,
+                                unsafe_allow_html=True,
+                            )
+
+                    st.markdown("</div>", unsafe_allow_html=True)
+
+                    # Learning Resources
+                    st.markdown(
+                        """
+                        <div class="feature-card">
+                            <h2>📺 Helpful Videos</h2>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+                    tab1, tab2 = st.tabs(["Resume Tips", "Interview Tips"])
+
+                    with tab1:
+                        # Resume Videos
+                        for category, videos in RESUME_VIDEOS.items():
+                            st.subheader(category)
+                            cols = st.columns(2)
+                            for i, video in enumerate(videos):
+                                with cols[i % 2]:
+                                    st.video(video[1])
+
+                    with tab2:
+                        # Interview Videos
+                        for category, videos in INTERVIEW_VIDEOS.items():
+                            st.subheader(category)
+                            cols = st.columns(2)
+                            for i, video in enumerate(videos):
+                                with cols[i % 2]:
+                                    st.video(video[1])
+
+                    st.markdown("</div>", unsafe_allow_html=True)
+
+        with analyzer_tabs[1]:
+            st.markdown(
+                """
+            <div style='background-color: #1e1e1e; padding: 20px; border-radius: 10px; margin: 10px 0;'>
+                <h3>AI-Powered Resume Analysis</h3>
+                <p>Get detailed insights from advanced AI models that analyze your resume and provide personalized recommendations.</p>
+                <p><strong>Upload your resume to get AI-powered analysis and recommendations.</strong></p>
             </div>
-        </div>
-        <div style="text-align: center; margin-top: 10px;">
-            <span style="
-                font-size: 1.2em;
-                color: {color};
-                font-weight: bold;
-            ">
-                {status}
-            </span>
-        </div>
-    </div>
-    """.format(
-        score=analysis['ats_score'],
-        color='#4CAF50' if analysis['ats_score'] >= 80 else '#FFA500' if analysis['ats_score'] >= 60 else '#FF4444',
-        status='Excellent' if analysis['ats_score'] >= 80 else 'Good' if analysis['ats_score'] >= 60 else 'Needs Improvement'
-    ), unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
-    # Skills Match Card
-    st.markdown("""
-    <div class="feature-card">
-        <h2>Skills Match</h2>
-    """, unsafe_allow_html=True)
+            # AI Model Selection
+            ai_model = st.selectbox(
+                "Select AI Model",
+                ["Google Gemini"],
+                help="Choose the AI model to analyze your resume",
+            )
 
-    st.metric(
-        "Keyword Match", f"{int(analysis.get('keyword_match', {}).get('score', 0))}%"
-    )
+            # Add job description input option
+            use_custom_job_desc = st.checkbox(
+                "Use custom job description",
+                value=False,
+                help="Enable this to provide a specific job description for more targeted analysis",
+            )
 
-    if analysis.get('keyword_match', {}).get('missing_skills'):
-        st.markdown("#### Missing Skills:")
-        for skill in analysis['keyword_match']['missing_skills']:
-            st.markdown(f"- {skill}")
+            custom_job_description = ""
+            if use_custom_job_desc:
+                custom_job_description = st.text_area(
+                    "Paste the job description here",
+                    height=200,
+                    placeholder="Paste the full job description from the company here for more targeted analysis...",
+                    help="Providing the actual job description will help the AI analyze your resume specifically for this position",
+                )
 
-    st.markdown("</div>", unsafe_allow_html=True)
+                st.markdown(
+                    """
+                <div style='background-color: #2e7d32; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+                    <p><i class="fas fa-lightbulb"></i> <strong>Pro Tip:</strong> Including the actual job description significantly improves the accuracy of the analysis and provides more relevant recommendations tailored to the specific position.</p>
+                </div>
+                """,
+                    unsafe_allow_html=True,
+                )
 
-with col2:
-    # Format Score Card
-    st.markdown("""
-    <div class="feature-card">
-        <h2>Format Analysis</h2>
-    """, unsafe_allow_html=True)
+                # Add AI Analyzer Stats in an expander
+            with st.expander("📊 AI Analyzer Statistics", expanded=False):
+                try:
+                    # Add a reset button for admin users
+                    if st.session_state.get("is_admin", False):
+                        if st.button(
+                            "🔄 Reset AI Analysis Statistics",
+                            type="secondary",
+                            key="reset_ai_stats_button_2",
+                        ):
+                            from config.database import reset_ai_analysis_stats
 
-    st.metric("Format Score", f"{int(analysis.get('format_score', 0))}%")
-    st.metric("Section Score", f"{int(analysis.get('section_score', 0))}%")
+                            result = reset_ai_analysis_stats()
+                            if result["success"]:
+                                st.success(result["message"])
+                            else:
+                                st.error(result["message"])
+                            # Refresh the page to show updated stats
+                            st.experimental_rerun()
 
-    st.markdown("</div>", unsafe_allow_html=True)
+                    # Get detailed AI analysis statistics
+                    from config.database import get_detailed_ai_analysis_stats
 
-    # Suggestions Card with improved UI
-    st.markdown("""
-    <div class="feature-card">
-        <h2>📋 Resume Improvement Suggestions</h2>
-    """, unsafe_allow_html=True)
-
-    # (You can continue your suggestion rendering code here)
-
-# Contact Section
-if analysis.get('contact_suggestions'):
-    st.markdown("""
-    <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-        <h3 style='color: #4CAF50; margin-bottom: 10px;'>📞 Contact Information</h3>
-        <ul style='list-style-type: none; padding-left: 0;'>
-    """, unsafe_allow_html=True)
-    for suggestion in analysis.get('contact_suggestions', []):
-        st.markdown(f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>", unsafe_allow_html=True)
-    st.markdown("</ul></div>", unsafe_allow_html=True)
-
-# Summary Section
-if analysis.get('summary_suggestions'):
-    st.markdown("""
-    <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-        <h3 style='color: #4CAF50; margin-bottom: 10px;'>📝 Professional Summary</h3>
-        <ul style='list-style-type: none; padding-left: 0;'>
-    """, unsafe_allow_html=True)
-    for suggestion in analysis.get('summary_suggestions', []):
-        st.markdown(f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>", unsafe_allow_html=True)
-    st.markdown("</ul></div>", unsafe_allow_html=True)
-
-# Skills Section
-if analysis.get('skills_suggestions') or analysis.get('keyword_match', {}).get('missing_skills'):
-    st.markdown("""
-    <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-        <h3 style='color: #4CAF50; margin-bottom: 10px;'>🎯 Skills</h3>
-        <ul style='list-style-type: none; padding-left: 0;'>
-    """, unsafe_allow_html=True)
-    for suggestion in analysis.get('skills_suggestions', []):
-        st.markdown(f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>", unsafe_allow_html=True)
-    if analysis.get('keyword_match', {}).get('missing_skills'):
-        st.markdown("<li style='margin-bottom: 8px;'>✓ Consider adding these relevant skills:</li>", unsafe_allow_html=True)
-        for skill in analysis['keyword_match']['missing_skills']:
-            st.markdown(f"<li style='margin-left: 20px; margin-bottom: 4px;'>• {skill}</li>", unsafe_allow_html=True)
-    st.markdown("</ul></div>", unsafe_allow_html=True)
-
-# Experience Section
-if analysis.get('experience_suggestions'):
-    st.markdown("""
-    <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-        <h3 style='color: #4CAF50; margin-bottom: 10px;'>💼 Work Experience</h3>
-        <ul style='list-style-type: none; padding-left: 0;'>
-    """, unsafe_allow_html=True)
-    for suggestion in analysis.get('experience_suggestions', []):
-        st.markdown(f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>", unsafe_allow_html=True)
-    st.markdown("</ul></div>", unsafe_allow_html=True)
-
-# Education Section
-if analysis.get('education_suggestions'):
-    st.markdown("""
-    <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-        <h3 style='color: #4CAF50; margin-bottom: 10px;'>🎓 Education</h3>
-        <ul style='list-style-type: none; padding-left: 0;'>
-    """, unsafe_allow_html=True)
-    for suggestion in analysis.get('education_suggestions', []):
-        st.markdown(f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>", unsafe_allow_html=True)
-    st.markdown("</ul></div>", unsafe_allow_html=True)
-
-# General Formatting Suggestions
-if analysis.get('format_suggestions'):
-    st.markdown("""
-    <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-        <h3 style='color: #4CAF50; margin-bottom: 10px;'>📄 Formatting</h3>
-        <ul style='list-style-type: none; padding-left: 0;'>
-    """, unsafe_allow_html=True)
-    for suggestion in analysis.get('format_suggestions', []):
-        st.markdown(f"<li style='margin-bottom: 8px;'>✓ {suggestion}</li>", unsafe_allow_html=True)
-    st.markdown("</ul></div>", unsafe_allow_html=True)
-
-st.markdown("</div>", unsafe_allow_html=True)
-
-# Course Recommendations
-st.markdown("""
-<div class="feature-card">
-    <h2>📚 Recommended Courses</h2>
-""", unsafe_allow_html=True)
-
-# Get courses based on role and category
-courses = get_courses_for_role(selected_role)
-if not courses:
-    category = get_category_for_role(selected_role)
-    courses = COURSES_BY_CATEGORY.get(category, {}).get(selected_role, [])
-
-# Display courses in a grid
-cols = st.columns(2)
-for i, course in enumerate(courses[:6]):  # Show top 6 courses
-    with cols[i % 2]:
-        st.markdown(f"""
-        <div style='background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin: 10px 0;'>
-            <h4>{course[0]}</h4>
-            <a href='{course[1]}' target='_blank'>View Course</a>
-        </div>
-        """, unsafe_allow_html=True)
-
-st.markdown("</div>", unsafe_allow_html=True)
-
-# Learning Resources
-st.markdown("""
-<div class="feature-card">
-    <h2>📺 Helpful Videos</h2>
-""", unsafe_allow_html=True)
-
-tab1, tab2 = st.tabs(["Resume Tips", "Interview Tips"])
-
-with tab1:
-    # Resume Videos
-    for category, videos in RESUME_VIDEOS.items():
-        st.subheader(category)
-        cols = st.columns(2)
-        for i, video in enumerate(videos):
-            with cols[i % 2]:
-                st.video(video[1])
-
-with tab2:
-    # Interview Videos
-    for category, videos in INTERVIEW_VIDEOS.items():
-        st.subheader(category)
-        cols = st.columns(2)
-        for i, video in enumerate(videos):
-            with cols[i % 2]:
-                st.video(video[1])
-
-st.markdown("</div>", unsafe_allow_html=True)
-
+                    ai_stats = get_detailed_ai_analysis_stats()
 
                     if ai_stats["total_analyses"] > 0:
                         # Create a more visually appealing layout
-                        st.markdown("""
+                        st.markdown(
+                            """
                         <style>
                         .stats-card {
                             background: linear-gradient(135deg, #1e3c72, #2a5298);
@@ -1629,62 +1895,101 @@ st.markdown("</div>", unsafe_allow_html=True)
                             text-align: center;
                         }
                         </style>
-                        """, unsafe_allow_html=True)
+                        """,
+                            unsafe_allow_html=True,
+                        )
 
                         col1, col2, col3 = st.columns(3)
 
                         with col1:
-                            st.markdown(f"""
+                            st.markdown(
+                                f"""
                             <div class="stats-card">
                                 <div class="stats-label">Total AI Analyses</div>
                                 <div class="stats-value">{ai_stats["total_analyses"]}</div>
                             </div>
-                            """, unsafe_allow_html=True)
+                            """,
+                                unsafe_allow_html=True,
+                            )
 
                         with col2:
                             # Determine color based on score
-                            score_color = "#38ef7d" if ai_stats["average_score"] >= 80 else "#FFEB3B" if ai_stats[
-                                "average_score"] >= 60 else "#FF5252"
-                            st.markdown(f"""
+                            score_color = (
+                                "#38ef7d"
+                                if ai_stats["average_score"] >= 80
+                                else (
+                                    "#FFEB3B"
+                                    if ai_stats["average_score"] >= 60
+                                    else "#FF5252"
+                                )
+                            )
+                            st.markdown(
+                                f"""
                             <div class="stats-card" style="background: linear-gradient(135deg, #2c3e50, {score_color});">
                                 <div class="stats-label">Average Resume Score</div>
                                 <div class="stats-value">{ai_stats["average_score"]}/100</div>
                             </div>
-                            """, unsafe_allow_html=True)
+                            """,
+                                unsafe_allow_html=True,
+                            )
 
                         with col3:
                             # Create a gauge chart for average score
                             import plotly.graph_objects as go
-                            fig = go.Figure(go.Indicator(
-                                mode="gauge+number",
-                                value=ai_stats["average_score"],
-                                domain={'x': [0, 1], 'y': [0, 1]},
-                                title={
-    'text': "Score", 'font': {
-        'size': 14, 'color': 'white'}},
-                                gauge={
-                                    'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "white"},
-                                    'bar': {'color': "#38ef7d" if ai_stats["average_score"] >= 80 else "#FFEB3B" if ai_stats["average_score"] >= 60 else "#FF5252"},
-                                    'bgcolor': "rgba(0,0,0,0)",
-                                    'borderwidth': 2,
-                                    'bordercolor': "white",
-                                    'steps': [
-                                        {'range': [
-                                            0, 40], 'color': 'rgba(255, 82, 82, 0.3)'},
-                                        {'range': [
-                                            40, 70], 'color': 'rgba(255, 235, 59, 0.3)'},
-                                        {'range': [
-                                            70, 100], 'color': 'rgba(56, 239, 125, 0.3)'}
-                                    ],
-                                }
-                            ))
+
+                            fig = go.Figure(
+                                go.Indicator(
+                                    mode="gauge+number",
+                                    value=ai_stats["average_score"],
+                                    domain={"x": [0, 1], "y": [0, 1]},
+                                    title={
+                                        "text": "Score",
+                                        "font": {"size": 14, "color": "white"},
+                                    },
+                                    gauge={
+                                        "axis": {
+                                            "range": [0, 100],
+                                            "tickwidth": 1,
+                                            "tickcolor": "white",
+                                        },
+                                        "bar": {
+                                            "color": (
+                                                "#38ef7d"
+                                                if ai_stats["average_score"] >= 80
+                                                else (
+                                                    "#FFEB3B"
+                                                    if ai_stats["average_score"] >= 60
+                                                    else "#FF5252"
+                                                )
+                                            )
+                                        },
+                                        "bgcolor": "rgba(0,0,0,0)",
+                                        "borderwidth": 2,
+                                        "bordercolor": "white",
+                                        "steps": [
+                                            {
+                                                "range": [0, 40],
+                                                "color": "rgba(255, 82, 82, 0.3)",
+                                            },
+                                            {
+                                                "range": [40, 70],
+                                                "color": "rgba(255, 235, 59, 0.3)",
+                                            },
+                                            {
+                                                "range": [70, 100],
+                                                "color": "rgba(56, 239, 125, 0.3)",
+                                            },
+                                        ],
+                                    },
+                                )
+                            )
 
                             fig.update_layout(
-                                paper_bgcolor='rgba(0,0,0,0)',
-                                plot_bgcolor='rgba(0,0,0,0)',
-                                font={'color': "white"},
+                                paper_bgcolor="rgba(0,0,0,0)",
+                                plot_bgcolor="rgba(0,0,0,0)",
+                                font={"color": "white"},
                                 height=150,
-                                margin=dict(l=10, r=10, t=30, b=10)
+                                margin=dict(l=10, r=10, t=30, b=10),
                             )
 
                             st.plotly_chart(fig, use_container_width=True)
@@ -1696,44 +2001,42 @@ st.markdown("</div>", unsafe_allow_html=True)
 
                             # Create a more colorful pie chart
                             import plotly.express as px
+
                             fig = px.pie(
                                 model_data,
                                 values="count",
                                 names="model",
                                 color_discrete_sequence=px.colors.qualitative.Bold,
-                                hole=0.4
+                                hole=0.4,
                             )
 
                             fig.update_traces(
-                                textposition='inside',
-                                textinfo='percent+label',
-                                marker=dict(
-    line=dict(
-        color='#000000',
-         width=1.5))
+                                textposition="inside",
+                                textinfo="percent+label",
+                                marker=dict(line=dict(color="#000000", width=1.5)),
                             )
 
                             fig.update_layout(
                                 margin=dict(l=20, r=20, t=30, b=20),
                                 height=300,
-                                paper_bgcolor='rgba(0,0,0,0)',
-                                plot_bgcolor='rgba(0,0,0,0)',
+                                paper_bgcolor="rgba(0,0,0,0)",
+                                plot_bgcolor="rgba(0,0,0,0)",
                                 font=dict(color="#ffffff", size=14),
                                 legend=dict(
                                     orientation="h",
                                     yanchor="bottom",
                                     y=-0.1,
                                     xanchor="center",
-                                    x=0.5
+                                    x=0.5,
                                 ),
                                 title={
-                                    'text': 'AI Model Distribution',
-                                    'y': 0.95,
-                                    'x': 0.5,
-                                    'xanchor': 'center',
-                                    'yanchor': 'top',
-                                    'font': {'size': 18, 'color': 'white'}
-                                }
+                                    "text": "AI Model Distribution",
+                                    "y": 0.95,
+                                    "x": 0.5,
+                                    "xanchor": "center",
+                                    "yanchor": "top",
+                                    "font": {"size": 18, "color": "white"},
+                                },
                             )
 
                             st.plotly_chart(fig, use_container_width=True)
@@ -1741,8 +2044,7 @@ st.markdown("</div>", unsafe_allow_html=True)
                         # Display top job roles with enhanced visualization
                         if ai_stats["top_job_roles"]:
                             st.markdown("### 🎯 Top Job Roles")
-                            roles_data = pd.DataFrame(
-                                ai_stats["top_job_roles"])
+                            roles_data = pd.DataFrame(ai_stats["top_job_roles"])
 
                             # Create a more colorful bar chart
                             fig = px.bar(
@@ -1752,39 +2054,39 @@ st.markdown("</div>", unsafe_allow_html=True)
                                 color="count",
                                 color_continuous_scale=px.colors.sequential.Viridis,
                                 labels={
-    "role": "Job Role", "count": "Number of Analyses"}
+                                    "role": "Job Role",
+                                    "count": "Number of Analyses",
+                                },
                             )
 
                             fig.update_traces(
                                 marker_line_width=1.5,
                                 marker_line_color="white",
-                                opacity=0.9
+                                opacity=0.9,
                             )
 
                             fig.update_layout(
                                 margin=dict(l=20, r=20, t=50, b=30),
                                 height=350,
-                                paper_bgcolor='rgba(0,0,0,0)',
-                                plot_bgcolor='rgba(0,0,0,0)',
+                                paper_bgcolor="rgba(0,0,0,0)",
+                                plot_bgcolor="rgba(0,0,0,0)",
                                 font=dict(color="#ffffff", size=14),
                                 title={
-                                    'text': 'Most Analyzed Job Roles',
-                                    'y': 0.95,
-                                    'x': 0.5,
-                                    'xanchor': 'center',
-                                    'yanchor': 'top',
-                                    'font': {'size': 18, 'color': 'white'}
+                                    "text": "Most Analyzed Job Roles",
+                                    "y": 0.95,
+                                    "x": 0.5,
+                                    "xanchor": "center",
+                                    "yanchor": "top",
+                                    "font": {"size": 18, "color": "white"},
                                 },
                                 xaxis=dict(
-                                    title="",
-                                    tickangle=-45,
-                                    tickfont=dict(size=12)
+                                    title="", tickangle=-45, tickfont=dict(size=12)
                                 ),
                                 yaxis=dict(
                                     title="Number of Analyses",
-                                    gridcolor="rgba(255, 255, 255, 0.1)"
+                                    gridcolor="rgba(255, 255, 255, 0.1)",
                                 ),
-                                coloraxis_showscale=False
+                                coloraxis_showscale=False,
                             )
 
                             st.plotly_chart(fig, use_container_width=True)
@@ -1793,7 +2095,8 @@ st.markdown("</div>", unsafe_allow_html=True)
                             # data for now)
                             st.markdown("### 📈 Analysis Trend")
                             st.info(
-                                "This is a conceptual visualization. To implement actual time-based analysis, additional data collection would be needed.")
+                                "This is a conceptual visualization. To implement actual time-based analysis, additional data collection would be needed."
+                            )
 
                             # Create mock data for timeline
                             import datetime
@@ -1801,17 +2104,18 @@ st.markdown("</div>", unsafe_allow_html=True)
 
                             today = datetime.now()
                             dates = [
-    (today -
-    datetime.timedelta(
-        days=i)).strftime('%Y-%m-%d') for i in range(7)]
+                                (today - datetime.timedelta(days=i)).strftime(
+                                    "%Y-%m-%d"
+                                )
+                                for i in range(7)
+                            ]
                             dates.reverse()
 
                             # Generate some random data that sums to
                             # total_analyses
                             total = ai_stats["total_analyses"]
                             if total > 7:
-                                values = np.random.dirichlet(
-                                    np.ones(7)) * total
+                                values = np.random.dirichlet(np.ones(7)) * total
                                 values = [round(v) for v in values]
                                 # Adjust to make sure sum equals total
                                 diff = total - sum(values)
@@ -1821,63 +2125,61 @@ st.markdown("</div>", unsafe_allow_html=True)
                                 for i in range(total):
                                     values[-(i % 7) - 1] += 1
 
-                            trend_data = pd.DataFrame({
-                                'Date': dates,
-                                'Analyses': values
-                            })
+                            trend_data = pd.DataFrame(
+                                {"Date": dates, "Analyses": values}
+                            )
 
                             fig = px.line(
                                 trend_data,
-                                x='Date',
-                                y='Analyses',
+                                x="Date",
+                                y="Analyses",
                                 markers=True,
-                                line_shape='spline',
-                                color_discrete_sequence=["#38ef7d"]
+                                line_shape="spline",
+                                color_discrete_sequence=["#38ef7d"],
                             )
 
                             fig.update_traces(
                                 line=dict(width=3),
-                                marker=dict(
-    size=8, line=dict(
-        width=2, color='white'))
+                                marker=dict(size=8, line=dict(width=2, color="white")),
                             )
 
                             fig.update_layout(
                                 margin=dict(l=20, r=20, t=50, b=30),
                                 height=300,
-                                paper_bgcolor='rgba(0,0,0,0)',
-                                plot_bgcolor='rgba(0,0,0,0)',
+                                paper_bgcolor="rgba(0,0,0,0)",
+                                plot_bgcolor="rgba(0,0,0,0)",
                                 font=dict(color="#ffffff", size=14),
                                 title={
-                                    'text': 'Analysis Activity (Last 7 Days)',
-                                    'y': 0.95,
-                                    'x': 0.5,
-                                    'xanchor': 'center',
-                                    'yanchor': 'top',
-                                    'font': {'size': 18, 'color': 'white'}
+                                    "text": "Analysis Activity (Last 7 Days)",
+                                    "y": 0.95,
+                                    "x": 0.5,
+                                    "xanchor": "center",
+                                    "yanchor": "top",
+                                    "font": {"size": 18, "color": "white"},
                                 },
                                 xaxis=dict(
-                                    title="",
-                                    gridcolor="rgba(255, 255, 255, 0.1)"
+                                    title="", gridcolor="rgba(255, 255, 255, 0.1)"
                                 ),
                                 yaxis=dict(
                                     title="Number of Analyses",
-                                    gridcolor="rgba(255, 255, 255, 0.1)"
-                                )
+                                    gridcolor="rgba(255, 255, 255, 0.1)",
+                                ),
                             )
 
                             st.plotly_chart(fig, use_container_width=True)
 
                         # Display score distribution if available
                         if ai_stats["score_distribution"]:
-                            st.markdown("""
+                            st.markdown(
+                                """
                             <h3 style='text-align: center; margin-bottom: 20px; background: linear-gradient(90deg, #4b6cb7, #182848); padding: 15px; border-radius: 10px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2);'>
                                 📊 Score Distribution Analysis
                             </h3>
-                            """, unsafe_allow_html=True)
+                            """,
+                                unsafe_allow_html=True,
+                            )
 
-                            score_data = pd.DataFrame(
-                                ai_stats["score_distribution"])
+                            score_data = pd.DataFrame(ai_stats["score_distribution"])
 
                             # Create a more visually appealing bar chart for
                             # score distribution
@@ -1891,32 +2193,35 @@ st.markdown("</div>", unsafe_allow_html=True)
                                     "21-40": "#FF7043",
                                     "41-60": "#FFEB3B",
                                     "61-80": "#8BC34A",
-                                    "81-100": "#38ef7d"
+                                    "81-100": "#38ef7d",
                                 },
                                 labels={
-    "range": "Score Range",
-     "count": "Number of Resumes"},
-                                text="count"  # Display count values on bars
+                                    "range": "Score Range",
+                                    "count": "Number of Resumes",
+                                },
+                                text="count",  # Display count values on bars
                             )
 
                             fig.update_traces(
                                 marker_line_width=2,
                                 marker_line_color="white",
                                 opacity=0.9,
-                                textposition='outside',
+                                textposition="outside",
                                 textfont=dict(
-    color="white", size=14, family="Arial, sans-serif"),
-                                hovertemplate="<b>Score Range:</b> %{x}<br><b>Number of Resumes:</b> %{y}<extra></extra>"
+                                    color="white", size=14, family="Arial, sans-serif"
+                                ),
+                                hovertemplate="<b>Score Range:</b> %{x}<br><b>Number of Resumes:</b> %{y}<extra></extra>",
                             )
 
                             # Add a gradient background to the chart
                             fig.update_layout(
                                 margin=dict(l=20, r=20, t=50, b=30),
                                 height=400,  # Increase height for better visibility
-                                paper_bgcolor='rgba(0,0,0,0)',
-                                plot_bgcolor='rgba(0,0,0,0)',
+                                paper_bgcolor="rgba(0,0,0,0)",
+                                plot_bgcolor="rgba(0,0,0,0)",
                                 font=dict(
-    color="#ffffff", size=14, family="Arial, sans-serif"),
+                                    color="#ffffff", size=14, family="Arial, sans-serif"
+                                ),
                                 # title={
                                 #     # 'text': 'Resume Score Distribution',
                                 #     'y': 0.95,
@@ -1927,21 +2232,28 @@ st.markdown("</div>", unsafe_allow_html=True)
                                 # },
                                 xaxis=dict(
                                     title=dict(
-    text="Score Range", font=dict(
-        size=16, color="white")),
+                                        text="Score Range",
+                                        font=dict(size=16, color="white"),
+                                    ),
                                     categoryorder="array",
                                     categoryarray=[
-    "0-20", "21-40", "41-60", "61-80", "81-100"],
+                                        "0-20",
+                                        "21-40",
+                                        "41-60",
+                                        "61-80",
+                                        "81-100",
+                                    ],
                                     tickfont=dict(size=14, color="white"),
-                                    gridcolor="rgba(255, 255, 255, 0.1)"
+                                    gridcolor="rgba(255, 255, 255, 0.1)",
                                 ),
                                 yaxis=dict(
                                     title=dict(
-    text="Number of Resumes", font=dict(
-        size=16, color="white")),
+                                        text="Number of Resumes",
+                                        font=dict(size=16, color="white"),
+                                    ),
                                     tickfont=dict(size=14, color="white"),
                                     gridcolor="rgba(255, 255, 255, 0.1)",
-                                    zeroline=False
+                                    zeroline=False,
                                 ),
                                 showlegend=False,
                                 bargap=0.2,  # Adjust gap between bars
@@ -1959,7 +2271,7 @@ st.markdown("</div>", unsafe_allow_html=True)
                                         layer="below",
                                         line_width=0,
                                     )
-                                ]
+                                ],
                             )
 
                             # Add annotations for insights
@@ -1980,35 +2292,45 @@ st.markdown("</div>", unsafe_allow_html=True)
                                     bordercolor="#FFEB3B",
                                     borderwidth=1,
                                     borderpad=4,
-                                    opacity=0.8
+                                    opacity=0.8,
                                 )
 
                             # Display the chart in a styled container
-                            st.markdown("""
+                            st.markdown(
+                                """
                             <div style='background: linear-gradient(135deg, #1e3c72, #2a5298); padding: 20px; border-radius: 15px; margin: 10px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.2);'>
-                            """, unsafe_allow_html=True)
+                            """,
+                                unsafe_allow_html=True,
+                            )
 
                             st.plotly_chart(fig, use_container_width=True)
 
                             # Add descriptive text below the chart
-                            st.markdown("""
+                            st.markdown(
+                                """
                             <p style='color: white; text-align: center; font-style: italic; margin-top: 10px;'>
                                 This chart shows the distribution of resume scores across different ranges, helping identify common performance levels.
                             </p>
                             </div>
-                            """, unsafe_allow_html=True)
+                            """,
+                                unsafe_allow_html=True,
+                            )
 
                         # Display recent analyses if available
                         if ai_stats["recent_analyses"]:
-                            st.markdown("""
+                            st.markdown(
+                                """
                             <h3 style='text-align: center; margin-bottom: 20px; background: linear-gradient(90deg, #4b6cb7, #182848); padding: 15px; border-radius: 10px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.2);'>
                                 🕒 Recent Resume Analyses
                             </h3>
-                            """, unsafe_allow_html=True)
+                            """,
+                                unsafe_allow_html=True,
+                            )
 
                             # Create a more modern styled table for recent
                             # analyses
-                            st.markdown("""
+                            st.markdown(
+                                """
                             <style>
                             .modern-analyses-table {
                                 width: 100%;
@@ -2118,53 +2440,74 @@ st.markdown("</div>", unsafe_allow_html=True)
                                     <th>Job Role</th>
                                     <th>Date</th>
                                 </tr>
-                            """, unsafe_allow_html=True)
+                            """,
+                                unsafe_allow_html=True,
+                            )
 
                             for analysis in ai_stats["recent_analyses"]:
                                 score = analysis["score"]
-                                score_class = "score-high" if score >= 80 else "score-medium" if score >= 60 else "score-low"
+                                score_class = (
+                                    "score-high"
+                                    if score >= 80
+                                    else "score-medium" if score >= 60 else "score-low"
+                                )
 
                                 # Determine model class
                                 model_name = analysis["model"]
-                                model_class = "model-gemini" if "Gemini" in model_name else "model-claude" if "Claude" in model_name else ""
+                                model_class = (
+                                    "model-gemini"
+                                    if "Gemini" in model_name
+                                    else (
+                                        "model-claude" if "Claude" in model_name else ""
+                                    )
+                                )
 
                                 # Format the date
                                 try:
                                     from datetime import datetime
+
                                     date_obj = datetime.strptime(
-                                        analysis["date"], "%Y-%m-%d %H:%M:%S")
-                                    formatted_date = date_obj.strftime(
-                                        "%b %d, %Y")
+                                        analysis["date"], "%Y-%m-%d %H:%M:%S"
+                                    )
+                                    formatted_date = date_obj.strftime("%b %d, %Y")
                                 except:
                                     formatted_date = analysis["date"]
 
-                                st.markdown(f"""
+                                st.markdown(
+                                    f"""
                                 <tr>
                                     <td><div class="model-badge {model_class}">{model_name}</div></td>
                                     <td><div class="score-pill {score_class}">{score}/100</div></td>
                                     <td><div class="role-badge">{analysis["job_role"]}</div></td>
                                     <td><div class="date-badge">{formatted_date}</div></td>
                                 </tr>
-                                """, unsafe_allow_html=True)
+                                """,
+                                    unsafe_allow_html=True,
+                                )
 
-                            st.markdown("""
+                            st.markdown(
+                                """
                             </table>
 
                             <p style='color: white; text-align: center; font-style: italic; margin-top: 15px;'>
                                 These are the most recent resume analyses performed by our AI models.
                             </p>
                             </div>
-                            """, unsafe_allow_html=True)
+                            """,
+                                unsafe_allow_html=True,
+                            )
                     else:
                         st.info(
-                            "No AI analysis data available yet. Upload and analyze resumes to see statistics here.")
+                            "No AI analysis data available yet. Upload and analyze resumes to see statistics here."
+                        )
                 except Exception as e:
                     st.error(f"Error loading AI analysis statistics: {str(e)}")
 
             # Job Role Selection for AI Analysis
             categories = list(self.job_roles.keys())
             selected_category = st.selectbox(
-    "Job Category", categories, key="ai_category")
+                "Job Category", categories, key="ai_category"
+            )
 
             roles = list(self.job_roles[selected_category].keys())
             selected_role = st.selectbox("Specific Role", roles, key="ai_role")
@@ -2172,35 +2515,40 @@ st.markdown("</div>", unsafe_allow_html=True)
             role_info = self.job_roles[selected_category][selected_role]
 
             # Display role information
-            st.markdown(f"""
+            st.markdown(
+                f"""
             <div style='background-color: #1e1e1e; padding: 20px; border-radius: 10px; margin: 10px 0;'>
                 <h3>{selected_role}</h3>
                 <p>{role_info['description']}</p>
                 <h4>Required Skills:</h4>
                 <p>{', '.join(role_info['required_skills'])}</p>
             </div>
-            """, unsafe_allow_html=True)
+            """,
+                unsafe_allow_html=True,
+            )
 
             # File Upload for AI Analysis
             uploaded_file = st.file_uploader(
-    "Upload your resume", type=[
-        'pdf', 'docx'], key="ai_file")
+                "Upload your resume", type=["pdf", "docx"], key="ai_file"
+            )
 
             if not uploaded_file:
-            # Display empty state with a prominent upload button
+                # Display empty state with a prominent upload button
                 st.markdown(
-                self.render_empty_state(
-            "fas fa-robot",
-                        "Upload your resume to get AI-powered analysis and recommendations"
-        ),
-        unsafe_allow_html=True
-    )
+                    self.render_empty_state(
+                        "fas fa-robot",
+                        "Upload your resume to get AI-powered analysis and recommendations",
+                    ),
+                    unsafe_allow_html=True,
+                )
             else:
                 # Add a prominent analyze button
-                analyze_ai = st.button("🤖 Analyze with AI",
-                                type="primary",
-                                use_container_width=True,
-                                key="analyze_ai_button")
+                analyze_ai = st.button(
+                    "🤖 Analyze with AI",
+                    type="primary",
+                    use_container_width=True,
+                    key="analyze_ai_button",
+                )
 
                 if analyze_ai:
                     with st.spinner(f"Analyzing your resume with {ai_model}..."):
@@ -2209,10 +2557,15 @@ st.markdown("</div>", unsafe_allow_html=True)
                         try:
                             if uploaded_file.type == "application/pdf":
                                 text = self.analyzer.extract_text_from_pdf(
-                                    uploaded_file)
-                            elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                                    uploaded_file
+                                )
+                            elif (
+                                uploaded_file.type
+                                == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            ):
                                 text = self.analyzer.extract_text_from_docx(
-                                    uploaded_file)
+                                    uploaded_file
+                                )
                             else:
                                 text = uploaded_file.getvalue().decode()
                         except Exception as e:
@@ -2224,98 +2577,117 @@ st.markdown("</div>", unsafe_allow_html=True)
                             # Show a loading animation
                             with st.spinner("🧠 AI is analyzing your resume..."):
                                 progress_bar = st.progress(0)
-                                
+
                                 # Get the selected model
                                 selected_model = "Google Gemini"
-                                
+
                                 # Update progress
                                 progress_bar.progress(10)
-                                
+
                                 # Extract text from the resume
                                 analyzer = AIResumeAnalyzer()
                                 if uploaded_file.type == "application/pdf":
                                     resume_text = analyzer.extract_text_from_pdf(
-                                        uploaded_file)
-                                elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                                        uploaded_file
+                                    )
+                                elif (
+                                    uploaded_file.type
+                                    == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                ):
                                     resume_text = analyzer.extract_text_from_docx(
-                                        uploaded_file)
+                                        uploaded_file
+                                    )
                                 else:
                                     # For text files or other formats
-                                    resume_text = uploaded_file.getvalue().decode('utf-8')
-                                
+                                    resume_text = uploaded_file.getvalue().decode(
+                                        "utf-8"
+                                    )
+
                                 # Initialize the AI analyzer (moved after text extraction)
                                 progress_bar.progress(30)
-                                
+
                                 # Get the job role
-                                job_role = selected_role if selected_role else "Not specified"
-                                
+                                job_role = (
+                                    selected_role if selected_role else "Not specified"
+                                )
+
                                 # Update progress
                                 progress_bar.progress(50)
-                                
+
                                 # Analyze the resume with Google Gemini
                                 if use_custom_job_desc and custom_job_description:
                                     # Use custom job description for analysis
-                                    analysis_result = analyzer.analyze_resume_with_gemini(
-                                        resume_text, job_role=job_role, job_description=custom_job_description)
+                                    analysis_result = (
+                                        analyzer.analyze_resume_with_gemini(
+                                            resume_text,
+                                            job_role=job_role,
+                                            job_description=custom_job_description,
+                                        )
+                                    )
                                     # Show that custom job description was used
-                                    st.session_state['used_custom_job_desc'] = True
+                                    st.session_state["used_custom_job_desc"] = True
                                 else:
                                     # Use standard role-based analysis
-                                    analysis_result = analyzer.analyze_resume_with_gemini(
-                                        resume_text, job_role=job_role)
-                                    st.session_state['used_custom_job_desc'] = False
+                                    analysis_result = (
+                                        analyzer.analyze_resume_with_gemini(
+                                            resume_text, job_role=job_role
+                                        )
+                                    )
+                                    st.session_state["used_custom_job_desc"] = False
 
-                                
                                 # Update progress
                                 progress_bar.progress(80)
-                                
+
                                 # Save the analysis to the database
                                 if analysis_result and "error" not in analysis_result:
                                     # Extract the resume score
                                     resume_score = analysis_result.get(
-                                        "resume_score", 0)
-                                    
+                                        "resume_score", 0
+                                    )
+
                                     # Save to database
                                     save_ai_analysis_data(
                                         None,  # No user_id needed
                                         {
                                             "model_used": selected_model,
                                             "resume_score": resume_score,
-                                            "job_role": job_role
-                                        }
+                                            "job_role": job_role,
+                                        },
                                     )
                                 # show snowflake effect
                                 st.snow()
 
                                 # Complete the progress
                                 progress_bar.progress(100)
-                                
+
                                 # Display the analysis result
                                 if analysis_result and "error" not in analysis_result:
                                     st.success("✅ Analysis complete!")
-                                    
+
                                     # Extract data from the analysis
-                                    full_response = analysis_result.get(
-                                        "analysis", "")
+                                    full_response = analysis_result.get("analysis", "")
                                     resume_score = analysis_result.get(
-                                        "resume_score", 0)
-                                    ats_score = analysis_result.get(
-                                        "ats_score", 0)
+                                        "resume_score", 0
+                                    )
+                                    ats_score = analysis_result.get("ats_score", 0)
                                     model_used = analysis_result.get(
-                                        "model_used", selected_model)
-                                    
+                                        "model_used", selected_model
+                                    )
+
                                     # Store the full response in session state for download
-                                    st.session_state['full_analysis'] = full_response
-                                    
+                                    st.session_state["full_analysis"] = full_response
+
                                     # Display the analysis in a nice format
                                     st.markdown("## Full Analysis Report")
-                                    
+
                                     # Get current date
                                     from datetime import datetime
+
                                     current_date = datetime.now().strftime("%B %d, %Y")
-                                    
+
                                     # Create a modern styled header for the report
-                                    st.markdown(f"""
+                                    st.markdown(
+                                        f"""
                                     <div style="background-color: #262730; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
                                         <h2 style="color: #ffffff; margin-bottom: 10px;">AI Resume Analysis Report</h2>
                                         <div style="display: flex; flex-wrap: wrap; gap: 20px;">
@@ -2327,143 +2699,300 @@ st.markdown("</div>", unsafe_allow_html=True)
                                                 <p style="color: #ffffff;"><strong>Overall Score:</strong> {resume_score}/100 - {"Excellent" if resume_score >= 80 else "Good" if resume_score >= 60 else "Needs Improvement"}</p>
                                                 {f'<p style="color: #4CAF50;"><strong>✓ Custom Job Description Used</strong></p>' if st.session_state.get('used_custom_job_desc', False) else ''}
                                     </div>
-                                    """, unsafe_allow_html=True)
-                                    
+                                    """,
+                                        unsafe_allow_html=True,
+                                    )
+
                                     # Add gauge charts for scores
                                     import plotly.graph_objects as go
-                                    
+
                                     col1, col2 = st.columns(2)
-                                    
+
                                     with col1:
                                         # Resume Score Gauge
-                                        fig1 = go.Figure(go.Indicator(
-                                            mode="gauge+number",
-                                            value=resume_score,
-                                            domain={'x': [0, 1], 'y': [0, 1]},
-                                            title={'text': "Resume Score", 'font': {'size': 16}},
-                                            gauge={
-                                                'axis': {'range': [0, 100], 'tickwidth': 1},
-                                                'bar': {'color': "#4CAF50" if resume_score >= 80 else "#FFA500" if resume_score >= 60 else "#FF4444"},
-                                                'bgcolor': "white",
-                                                'borderwidth': 2,
-                                                'bordercolor': "gray",
-                                                'steps': [
-                                                    {'range': [0, 40], 'color': 'rgba(255, 68, 68, 0.2)'},
-                                                    {'range': [40, 60], 'color': 'rgba(255, 165, 0, 0.2)'},
-                                                    {'range': [60, 80], 'color': 'rgba(255, 214, 0, 0.2)'},
-                                                    {'range': [80, 100], 'color': 'rgba(76, 175, 80, 0.2)'}
-                                                ],
-                                                'threshold': {
-                                                    'line': {'color': "red", 'width': 4},
-                                                    'thickness': 0.75,
-                                                    'value': 60
-                                                }
-                                            }
-                                        ))
-                                        
+                                        fig1 = go.Figure(
+                                            go.Indicator(
+                                                mode="gauge+number",
+                                                value=resume_score,
+                                                domain={"x": [0, 1], "y": [0, 1]},
+                                                title={
+                                                    "text": "Resume Score",
+                                                    "font": {"size": 16},
+                                                },
+                                                gauge={
+                                                    "axis": {
+                                                        "range": [0, 100],
+                                                        "tickwidth": 1,
+                                                    },
+                                                    "bar": {
+                                                        "color": (
+                                                            "#4CAF50"
+                                                            if resume_score >= 80
+                                                            else (
+                                                                "#FFA500"
+                                                                if resume_score >= 60
+                                                                else "#FF4444"
+                                                            )
+                                                        )
+                                                    },
+                                                    "bgcolor": "white",
+                                                    "borderwidth": 2,
+                                                    "bordercolor": "gray",
+                                                    "steps": [
+                                                        {
+                                                            "range": [0, 40],
+                                                            "color": "rgba(255, 68, 68, 0.2)",
+                                                        },
+                                                        {
+                                                            "range": [40, 60],
+                                                            "color": "rgba(255, 165, 0, 0.2)",
+                                                        },
+                                                        {
+                                                            "range": [60, 80],
+                                                            "color": "rgba(255, 214, 0, 0.2)",
+                                                        },
+                                                        {
+                                                            "range": [80, 100],
+                                                            "color": "rgba(76, 175, 80, 0.2)",
+                                                        },
+                                                    ],
+                                                    "threshold": {
+                                                        "line": {
+                                                            "color": "red",
+                                                            "width": 4,
+                                                        },
+                                                        "thickness": 0.75,
+                                                        "value": 60,
+                                                    },
+                                                },
+                                            )
+                                        )
+
                                         fig1.update_layout(
                                             height=250,
                                             margin=dict(l=20, r=20, t=50, b=20),
                                         )
-                                        
+
                                         st.plotly_chart(fig1, use_container_width=True)
-                                        
-                                        status = "Excellent" if resume_score >= 80 else "Good" if resume_score >= 60 else "Needs Improvement"
-                                        st.markdown(f"<div style='text-align: center; font-weight: bold;'>{status}</div>", unsafe_allow_html=True)
-                                    
+
+                                        status = (
+                                            "Excellent"
+                                            if resume_score >= 80
+                                            else (
+                                                "Good"
+                                                if resume_score >= 60
+                                                else "Needs Improvement"
+                                            )
+                                        )
+                                        st.markdown(
+                                            f"<div style='text-align: center; font-weight: bold;'>{status}</div>",
+                                            unsafe_allow_html=True,
+                                        )
+
                                     with col2:
                                         # ATS Score Gauge
-                                        fig2 = go.Figure(go.Indicator(
-                                            mode="gauge+number",
-                                            value=ats_score,
-                                            domain={'x': [0, 1], 'y': [0, 1]},
-                                            title={'text': "ATS Optimization Score", 'font': {'size': 16}},
-                                            gauge={
-                                                'axis': {'range': [0, 100], 'tickwidth': 1},
-                                                'bar': {'color': "#4CAF50" if ats_score >= 80 else "#FFA500" if ats_score >= 60 else "#FF4444"},
-                                                'bgcolor': "white",
-                                                'borderwidth': 2,
-                                                'bordercolor': "gray",
-                                                'steps': [
-                                                    {'range': [0, 40], 'color': 'rgba(255, 68, 68, 0.2)'},
-                                                    {'range': [40, 60], 'color': 'rgba(255, 165, 0, 0.2)'},
-                                                    {'range': [60, 80], 'color': 'rgba(255, 214, 0, 0.2)'},
-                                                    {'range': [80, 100], 'color': 'rgba(76, 175, 80, 0.2)'}
-                                                ],
-                                                'threshold': {
-                                                    'line': {'color': "red", 'width': 4},
-                                                    'thickness': 0.75,
-                                                    'value': 60
-                                                }
-                                            }
-                                        ))
-                                        
+                                        fig2 = go.Figure(
+                                            go.Indicator(
+                                                mode="gauge+number",
+                                                value=ats_score,
+                                                domain={"x": [0, 1], "y": [0, 1]},
+                                                title={
+                                                    "text": "ATS Optimization Score",
+                                                    "font": {"size": 16},
+                                                },
+                                                gauge={
+                                                    "axis": {
+                                                        "range": [0, 100],
+                                                        "tickwidth": 1,
+                                                    },
+                                                    "bar": {
+                                                        "color": (
+                                                            "#4CAF50"
+                                                            if ats_score >= 80
+                                                            else (
+                                                                "#FFA500"
+                                                                if ats_score >= 60
+                                                                else "#FF4444"
+                                                            )
+                                                        )
+                                                    },
+                                                    "bgcolor": "white",
+                                                    "borderwidth": 2,
+                                                    "bordercolor": "gray",
+                                                    "steps": [
+                                                        {
+                                                            "range": [0, 40],
+                                                            "color": "rgba(255, 68, 68, 0.2)",
+                                                        },
+                                                        {
+                                                            "range": [40, 60],
+                                                            "color": "rgba(255, 165, 0, 0.2)",
+                                                        },
+                                                        {
+                                                            "range": [60, 80],
+                                                            "color": "rgba(255, 214, 0, 0.2)",
+                                                        },
+                                                        {
+                                                            "range": [80, 100],
+                                                            "color": "rgba(76, 175, 80, 0.2)",
+                                                        },
+                                                    ],
+                                                    "threshold": {
+                                                        "line": {
+                                                            "color": "red",
+                                                            "width": 4,
+                                                        },
+                                                        "thickness": 0.75,
+                                                        "value": 60,
+                                                    },
+                                                },
+                                            )
+                                        )
+
                                         fig2.update_layout(
                                             height=250,
                                             margin=dict(l=20, r=20, t=50, b=20),
                                         )
-                                        
+
                                         st.plotly_chart(fig2, use_container_width=True)
-                                        
-                                        status = "Excellent" if ats_score >= 80 else "Good" if ats_score >= 60 else "Needs Improvement"
-                                        st.markdown(f"<div style='text-align: center; font-weight: bold;'>{status}</div>", unsafe_allow_html=True)
+
+                                        status = (
+                                            "Excellent"
+                                            if ats_score >= 80
+                                            else (
+                                                "Good"
+                                                if ats_score >= 60
+                                                else "Needs Improvement"
+                                            )
+                                        )
+                                        st.markdown(
+                                            f"<div style='text-align: center; font-weight: bold;'>{status}</div>",
+                                            unsafe_allow_html=True,
+                                        )
 
                                     # Add Job Description Match Score if custom job description was used
-                                    if st.session_state.get('used_custom_job_desc', False) and custom_job_description:
+                                    if (
+                                        st.session_state.get(
+                                            "used_custom_job_desc", False
+                                        )
+                                        and custom_job_description
+                                    ):
                                         # Extract job match score from analysis result or calculate it
-                                        job_match_score = analysis_result.get("job_match_score", 0)
-                                        if not job_match_score and "job_match" in analysis_result:
-                                            job_match_score = analysis_result["job_match"].get("score", 0)
-                                        
+                                        job_match_score = analysis_result.get(
+                                            "job_match_score", 0
+                                        )
+                                        if (
+                                            not job_match_score
+                                            and "job_match" in analysis_result
+                                        ):
+                                            job_match_score = analysis_result[
+                                                "job_match"
+                                            ].get("score", 0)
+
                                         # If we have a job match score, display it
                                         if job_match_score:
-                                            st.markdown("""
+                                            st.markdown(
+                                                """
                                             <h3 style="background: linear-gradient(90deg, #4d7c0f, #84cc16); color: white; padding: 10px; border-radius: 5px; margin-top: 20px;">
                                                 <i class="fas fa-handshake"></i> Job Description Match Analysis
                                             </h3>
-                                            """, unsafe_allow_html=True)
-                                            
+                                            """,
+                                                unsafe_allow_html=True,
+                                            )
+
                                             col1, col2 = st.columns(2)
-                                            
+
                                             with col1:
                                                 # Job Match Score Gauge
-                                                fig3 = go.Figure(go.Indicator(
-                                                    mode="gauge+number",
-                                                    value=job_match_score,
-                                                    domain={'x': [0, 1], 'y': [0, 1]},
-                                                    title={'text': "Job Match Score", 'font': {'size': 16}},
-                                                    gauge={
-                                                        'axis': {'range': [0, 100], 'tickwidth': 1},
-                                                        'bar': {'color': "#4CAF50" if job_match_score >= 80 else "#FFA500" if job_match_score >= 60 else "#FF4444"},
-                                                        'bgcolor': "white",
-                                                        'borderwidth': 2,
-                                                        'bordercolor': "gray",
-                                                        'steps': [
-                                                            {'range': [0, 40], 'color': 'rgba(255, 68, 68, 0.2)'},
-                                                            {'range': [40, 60], 'color': 'rgba(255, 165, 0, 0.2)'},
-                                                            {'range': [60, 80], 'color': 'rgba(255, 214, 0, 0.2)'},
-                                                            {'range': [80, 100], 'color': 'rgba(76, 175, 80, 0.2)'}
-                                                        ],
-                                                        'threshold': {
-                                                            'line': {'color': "red", 'width': 4},
-                                                            'thickness': 0.75,
-                                                            'value': 60
-                                                        }
-                                                    }
-                                                ))
-                                                
+                                                fig3 = go.Figure(
+                                                    go.Indicator(
+                                                        mode="gauge+number",
+                                                        value=job_match_score,
+                                                        domain={
+                                                            "x": [0, 1],
+                                                            "y": [0, 1],
+                                                        },
+                                                        title={
+                                                            "text": "Job Match Score",
+                                                            "font": {"size": 16},
+                                                        },
+                                                        gauge={
+                                                            "axis": {
+                                                                "range": [0, 100],
+                                                                "tickwidth": 1,
+                                                            },
+                                                            "bar": {
+                                                                "color": (
+                                                                    "#4CAF50"
+                                                                    if job_match_score
+                                                                    >= 80
+                                                                    else (
+                                                                        "#FFA500"
+                                                                        if job_match_score
+                                                                        >= 60
+                                                                        else "#FF4444"
+                                                                    )
+                                                                )
+                                                            },
+                                                            "bgcolor": "white",
+                                                            "borderwidth": 2,
+                                                            "bordercolor": "gray",
+                                                            "steps": [
+                                                                {
+                                                                    "range": [0, 40],
+                                                                    "color": "rgba(255, 68, 68, 0.2)",
+                                                                },
+                                                                {
+                                                                    "range": [40, 60],
+                                                                    "color": "rgba(255, 165, 0, 0.2)",
+                                                                },
+                                                                {
+                                                                    "range": [60, 80],
+                                                                    "color": "rgba(255, 214, 0, 0.2)",
+                                                                },
+                                                                {
+                                                                    "range": [80, 100],
+                                                                    "color": "rgba(76, 175, 80, 0.2)",
+                                                                },
+                                                            ],
+                                                            "threshold": {
+                                                                "line": {
+                                                                    "color": "red",
+                                                                    "width": 4,
+                                                                },
+                                                                "thickness": 0.75,
+                                                                "value": 60,
+                                                            },
+                                                        },
+                                                    )
+                                                )
+
                                                 fig3.update_layout(
                                                     height=250,
                                                     margin=dict(l=20, r=20, t=50, b=20),
                                                 )
-                                                
-                                                st.plotly_chart(fig3, use_container_width=True)
-                                                
-                                                match_status = "Excellent Match" if job_match_score >= 80 else "Good Match" if job_match_score >= 60 else "Low Match"
-                                                st.markdown(f"<div style='text-align: center; font-weight: bold;'>{match_status}</div>", unsafe_allow_html=True)
-                                            
+
+                                                st.plotly_chart(
+                                                    fig3, use_container_width=True
+                                                )
+
+                                                match_status = (
+                                                    "Excellent Match"
+                                                    if job_match_score >= 80
+                                                    else (
+                                                        "Good Match"
+                                                        if job_match_score >= 60
+                                                        else "Low Match"
+                                                    )
+                                                )
+                                                st.markdown(
+                                                    f"<div style='text-align: center; font-weight: bold;'>{match_status}</div>",
+                                                    unsafe_allow_html=True,
+                                                )
+
                                             with col2:
-                                                st.markdown("""
+                                                st.markdown(
+                                                    """
                                                 <div style="background-color: #262730; padding: 20px; border-radius: 10px; height: 100%;">
                                                     <h4 style="color: #ffffff; margin-bottom: 15px;">What This Means</h4>
                                                     <p style="color: #ffffff;">This score represents how well your resume matches the specific job description you provided.</p>
@@ -2473,12 +3002,13 @@ st.markdown("</div>", unsafe_allow_html=True)
                                                         <li><strong>Below 60:</strong> Consider tailoring your resume more specifically to this job</li>
                                                     </ul>
                                                 </div>
-                                                """, unsafe_allow_html=True)
-                                    
+                                                """,
+                                                    unsafe_allow_html=True,
+                                                )
 
                                     # Format the full response with better styling
                                     formatted_analysis = full_response
-                                    
+
                                     # Replace section headers with styled headers
                                     section_styles = {
                                         "## Overall Assessment": """<div class="report-section">
@@ -2486,112 +3016,138 @@ st.markdown("</div>", unsafe_allow_html=True)
                                                 <i class="fas fa-chart-line"></i> Overall Assessment
                                             </h3>
                                             <div class="section-content">""",
-                                            
                                         "## Professional Profile Analysis": """<div class="report-section">
                                             <h3 style="background: linear-gradient(90deg, #047857, #10b981); color: white; padding: 10px; border-radius: 5px;">
                                                 <i class="fas fa-user-tie"></i> Professional Profile Analysis
                                             </h3>
                                             <div class="section-content">""",
-                                            
                                         "## Skills Analysis": """<div class="report-section">
                                             <h3 style="background: linear-gradient(90deg, #4f46e5, #818cf8); color: white; padding: 10px; border-radius: 5px;">
                                                 <i class="fas fa-tools"></i> Skills Analysis
                                             </h3>
                                             <div class="section-content">""",
-                                            
                                         "## Experience Analysis": """<div class="report-section">
                                             <h3 style="background: linear-gradient(90deg, #9f1239, #e11d48); color: white; padding: 10px; border-radius: 5px;">
                                                 <i class="fas fa-briefcase"></i> Experience Analysis
                                             </h3>
                                             <div class="section-content">""",
-                                            
                                         "## Education Analysis": """<div class="report-section">
                                             <h3 style="background: linear-gradient(90deg, #854d0e, #eab308); color: white; padding: 10px; border-radius: 5px;">
                                                 <i class="fas fa-graduation-cap"></i> Education Analysis
                                             </h3>
                                             <div class="section-content">""",
-                                            
                                         "## Key Strengths": """<div class="report-section">
                                             <h3 style="background: linear-gradient(90deg, #166534, #22c55e); color: white; padding: 10px; border-radius: 5px;">
                                                 <i class="fas fa-check-circle"></i> Key Strengths
                                             </h3>
                                             <div class="section-content">""",
-                                            
                                         "## Areas for Improvement": """<div class="report-section">
                                             <h3 style="background: linear-gradient(90deg, #9f1239, #fb7185); color: white; padding: 10px; border-radius: 5px;">
                                                 <i class="fas fa-exclamation-circle"></i> Areas for Improvement
                                             </h3>
                                             <div class="section-content">""",
-                                            
                                         "## ATS Optimization Assessment": """<div class="report-section">
                                             <h3 style="background: linear-gradient(90deg, #0e7490, #06b6d4); color: white; padding: 10px; border-radius: 5px;">
                                                 <i class="fas fa-robot"></i> ATS Optimization Assessment
                                             </h3>
                                             <div class="section-content">""",
-                                            
                                         "## Recommended Courses": """<div class="report-section">
                                             <h3 style="background: linear-gradient(90deg, #5b21b6, #8b5cf6); color: white; padding: 10px; border-radius: 5px;">
                                                 <i class="fas fa-book"></i> Recommended Courses
                                             </h3>
                                             <div class="section-content">""",
-                                            
                                         "## Resume Score": """<div class="report-section">
                                             <h3 style="background: linear-gradient(90deg, #0369a1, #0ea5e9); color: white; padding: 10px; border-radius: 5px;">
                                                 <i class="fas fa-star"></i> Resume Score
                                             </h3>
                                             <div class="section-content">""",
-                                            
                                         "## Role Alignment Analysis": """<div class="report-section">
                                             <h3 style="background: linear-gradient(90deg, #7c2d12, #ea580c); color: white; padding: 10px; border-radius: 5px;">
                                                 <i class="fas fa-bullseye"></i> Role Alignment Analysis
                                             </h3>
                                             <div class="section-content">""",
-                                            
                                         "## Job Match Analysis": """<div class="report-section">
                                             <h3 style="background: linear-gradient(90deg, #4d7c0f, #84cc16); color: white; padding: 10px; border-radius: 5px;">
                                                 <i class="fas fa-handshake"></i> Job Match Analysis
                                             </h3>
                                             <div class="section-content">""",
                                     }
-                                    
+
                                     # Apply the styling to each section
                                     for section, style in section_styles.items():
                                         if section in formatted_analysis:
-                                            formatted_analysis = formatted_analysis.replace(
-                                                section, style)
+                                            formatted_analysis = (
+                                                formatted_analysis.replace(
+                                                    section, style
+                                                )
+                                            )
                                             # Add closing div tags
                                             next_section = False
                                             for next_sec in section_styles.keys():
-                                                if next_sec != section and next_sec in formatted_analysis.split(style)[1]:
-                                                    split_text = formatted_analysis.split(style)[1].split(next_sec)
-                                                    formatted_analysis = formatted_analysis.split(style)[0] + style + split_text[0] + "</div></div>" + next_sec + "".join(split_text[1:])
+                                                if (
+                                                    next_sec != section
+                                                    and next_sec
+                                                    in formatted_analysis.split(style)[
+                                                        1
+                                                    ]
+                                                ):
+                                                    split_text = (
+                                                        formatted_analysis.split(style)[
+                                                            1
+                                                        ].split(next_sec)
+                                                    )
+                                                    formatted_analysis = (
+                                                        formatted_analysis.split(style)[
+                                                            0
+                                                        ]
+                                                        + style
+                                                        + split_text[0]
+                                                        + "</div></div>"
+                                                        + next_sec
+                                                        + "".join(split_text[1:])
+                                                    )
                                                     next_section = True
                                                     break
                                             if not next_section:
-                                                formatted_analysis = formatted_analysis + "</div></div>"
-                                    
+                                                formatted_analysis = (
+                                                    formatted_analysis + "</div></div>"
+                                                )
+
                                     # Remove any extra closing div tags that might have been added
-                                    formatted_analysis = formatted_analysis.replace("</div></div></div></div>", "</div></div>")
-                                    
+                                    formatted_analysis = formatted_analysis.replace(
+                                        "</div></div></div></div>", "</div></div>"
+                                    )
+
                                     # Ensure we don't have any orphaned closing tags at the end
                                     if formatted_analysis.endswith("</div>"):
                                         # Count opening and closing div tags
                                         open_tags = formatted_analysis.count("<div")
                                         close_tags = formatted_analysis.count("</div>")
-                                        
+
                                         # If we have more closing than opening tags, remove the extras
                                         if close_tags > open_tags:
                                             excess = close_tags - open_tags
-                                            formatted_analysis = formatted_analysis[:-6 * excess]
-                                    
+                                            formatted_analysis = formatted_analysis[
+                                                : -6 * excess
+                                            ]
+
                                     # Clean up any visible HTML tags that might appear in the text
-                                    formatted_analysis = formatted_analysis.replace("&lt;/div&gt;", "")
-                                    formatted_analysis = formatted_analysis.replace("&lt;div&gt;", "")
-                                    formatted_analysis = formatted_analysis.replace("<div>", "<div>")  # Ensure proper opening
-                                    formatted_analysis = formatted_analysis.replace("</div>", "</div>")  # Ensure proper closing
-                                    
+                                    formatted_analysis = formatted_analysis.replace(
+                                        "&lt;/div&gt;", ""
+                                    )
+                                    formatted_analysis = formatted_analysis.replace(
+                                        "&lt;div&gt;", ""
+                                    )
+                                    formatted_analysis = formatted_analysis.replace(
+                                        "<div>", "<div>"
+                                    )  # Ensure proper opening
+                                    formatted_analysis = formatted_analysis.replace(
+                                        "</div>", "</div>"
+                                    )  # Ensure proper closing
+
                                     # Add CSS for the report
-                                    st.markdown("""
+                                    st.markdown(
+                                        """
                                     <style>
                                         .report-section {
                                             margin-bottom: 25px;
@@ -2620,14 +3176,19 @@ st.markdown("</div>", unsafe_allow_html=True)
                                             margin-bottom: 5px;
                                         }
                                     </style>
-                                    """, unsafe_allow_html=True)
+                                    """,
+                                        unsafe_allow_html=True,
+                                    )
 
                                     # Display the formatted analysis
-                                    st.markdown(f"""
+                                    st.markdown(
+                                        f"""
                                     <div style="background-color: #262730; padding: 20px; border-radius: 10px; border: 1px solid #4B4B4B; color: #ffffff;">
                                         {formatted_analysis}
                                     </div>
-                                    """, unsafe_allow_html=True)
+                                    """,
+                                        unsafe_allow_html=True,
+                                    )
 
                                     # Create a PDF report
                                     pdf_buffer = self.ai_analyzer.generate_pdf_report(
@@ -2636,14 +3197,27 @@ st.markdown("</div>", unsafe_allow_html=True)
                                             "ats_score": ats_score,
                                             "model_used": model_used,
                                             "full_response": full_response,
-                                            "strengths": analysis_result.get("strengths", []),
-                                            "weaknesses": analysis_result.get("weaknesses", []),
-                                            "used_custom_job_desc": st.session_state.get('used_custom_job_desc', False),
-                                            "custom_job_description": custom_job_description if st.session_state.get('used_custom_job_desc', False) else ""
+                                            "strengths": analysis_result.get(
+                                                "strengths", []
+                                            ),
+                                            "weaknesses": analysis_result.get(
+                                                "weaknesses", []
+                                            ),
+                                            "used_custom_job_desc": st.session_state.get(
+                                                "used_custom_job_desc", False
+                                            ),
+                                            "custom_job_description": (
+                                                custom_job_description
+                                                if st.session_state.get(
+                                                    "used_custom_job_desc", False
+                                                )
+                                                else ""
+                                            ),
                                         },
                                         candidate_name=st.session_state.get(
-                                            'candidate_name', 'Candidate'),
-                                        job_role=selected_role
+                                            "candidate_name", "Candidate"
+                                        ),
+                                        job_role=selected_role,
                                     )
 
                                     # PDF download button
@@ -2654,49 +3228,53 @@ st.markdown("</div>", unsafe_allow_html=True)
                                             file_name=f"resume_analysis_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
                                             mime="application/pdf",
                                             use_container_width=True,
-                                            on_click=lambda: st.balloons()
+                                            on_click=lambda: st.balloons(),
                                         )
                                     else:
-                                        st.error("PDF generation failed. Please try again later.")
+                                        st.error(
+                                            "PDF generation failed. Please try again later."
+                                        )
                                 else:
-                                    st.error(f"Analysis failed: {analysis_result.get('error', 'Unknown error')}")
+                                    st.error(
+                                        f"Analysis failed: {analysis_result.get('error', 'Unknown error')}"
+                                    )
                         except Exception as ai_error:
                             st.error(f"Error during AI analysis: {str(ai_error)}")
                             import traceback as tb
+
                             st.code(tb.format_exc())
 
     def render_home(self):
         apply_modern_styles()
-        
+
         # Hero Section
         hero_section(
             "AI job helper",
-            
         )
-        
+
         # Features Section
         st.markdown('<div class="feature-grid">', unsafe_allow_html=True)
-        
+
         feature_card(
             "fas fa-robot",
             "AI-Powered Analysis",
-            "Get instant feedback on your resume with advanced AI analysis that identifies strengths and areas for improvement."
+            "Get instant feedback on your resume with advanced AI analysis that identifies strengths and areas for improvement.",
         )
-        
+
         feature_card(
             "fas fa-magic",
             "Smart Resume Builder",
-            "Create professional resumes with our intelligent builder that suggests optimal content and formatting."
+            "Create professional resumes with our intelligent builder that suggests optimal content and formatting.",
         )
-        
+
         feature_card(
             "fas fa-chart-line",
             "Career Insights",
-            "Access detailed analytics and personalized recommendations to enhance your career prospects."
+            "Access detailed analytics and personalized recommendations to enhance your career prospects.",
         )
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-        
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
     def render_job_search(self):
         """Render the job search page"""
         render_job_search()
@@ -2704,39 +3282,55 @@ st.markdown("</div>", unsafe_allow_html=True)
     def render_feedback_page(self):
         """Render the feedback page"""
         apply_modern_styles()
-        
+
         # Page Header
         page_header(
-            "Feedback & Suggestions",
-            "Help us improve by sharing your thoughts"
+            "Feedback & Suggestions", "Help us improve by sharing your thoughts"
         )
-        
+
         # Initialize feedback manager
         feedback_manager = FeedbackManager()
-        
+
         # Create tabs for form and stats
         form_tab, stats_tab = st.tabs(["Submit Feedback", "Feedback Stats"])
-        
+
         with form_tab:
             feedback_manager.render_feedback_form()
-            
+
         with stats_tab:
             feedback_manager.render_feedback_stats()
 
     def main(self):
         """Main application entry point"""
         self.apply_global_styles()
-        
+
         # Admin login/logout in sidebar
         with st.sidebar:
-            st_lottie(self.load_lottie_url("https://assets5.lottiefiles.com/packages/lf20_xyadoh9h.json"), height=200, key="sidebar_animation")
+            st_lottie(
+                self.load_lottie_url(
+                    "https://assets5.lottiefiles.com/packages/lf20_xyadoh9h.json"
+                ),
+                height=200,
+                key="sidebar_animation",
+            )
             st.title("AI Job Helper")
             st.markdown("---")
-            
+
             # Navigation buttons
             for page_name in self.pages.keys():
                 if st.button(page_name, use_container_width=True):
-                    cleaned_name = page_name.lower().replace(" ", "_").replace("🏠", "").replace("🔍", "").replace("📝", "").replace("📊", "").replace("🎯", "").replace("💬", "").replace("ℹ️", "").strip()
+                    cleaned_name = (
+                        page_name.lower()
+                        .replace(" ", "_")
+                        .replace("🏠", "")
+                        .replace("🔍", "")
+                        .replace("📝", "")
+                        .replace("📊", "")
+                        .replace("🎯", "")
+                        .replace("💬", "")
+                        .replace("ℹ️", "")
+                        .strip()
+                    )
                     st.session_state.page = cleaned_name
                     st.rerun()
 
@@ -2745,11 +3339,15 @@ st.markdown("</div>", unsafe_allow_html=True)
             st.markdown("---")
 
             # Admin Login/Logout section at bottom
-            if st.session_state.get('is_admin', False):
-                st.success(f"Logged in as: {st.session_state.get('current_admin_email')}")
+            if st.session_state.get("is_admin", False):
+                st.success(
+                    f"Logged in as: {st.session_state.get('current_admin_email')}"
+                )
                 if st.button("Logout", key="logout_button"):
                     try:
-                        log_admin_action(st.session_state.get('current_admin_email'), "logout")
+                        log_admin_action(
+                            st.session_state.get("current_admin_email"), "logout"
+                        )
                         st.session_state.is_admin = False
                         st.session_state.current_admin_email = None
                         st.success("Logged out successfully!")
@@ -2759,41 +3357,53 @@ st.markdown("</div>", unsafe_allow_html=True)
             else:
                 with st.expander("👤 Admin Login"):
                     admin_email_input = st.text_input("Email", key="admin_email_input")
-                    admin_password = st.text_input("Password", type="password", key="admin_password_input")
+                    admin_password = st.text_input(
+                        "Password", type="password", key="admin_password_input"
+                    )
                     if st.button("Login", key="login_button"):
-                            try:
-                                if verify_admin(admin_email_input, admin_password):
-                                    st.session_state.is_admin = True
-                                    st.session_state.current_admin_email = admin_email_input
-                                    log_admin_action(admin_email_input, "login")
-                                    st.success("Logged in successfully!")
-                                    st.rerun()
-                                else:
-                                    st.error("Invalid credentials")
-                            except Exception as e:
-                                st.error(f"Error during login: {str(e)}")
-        
-            
+                        try:
+                            if verify_admin(admin_email_input, admin_password):
+                                st.session_state.is_admin = True
+                                st.session_state.current_admin_email = admin_email_input
+                                log_admin_action(admin_email_input, "login")
+                                st.success("Logged in successfully!")
+                                st.rerun()
+                            else:
+                                st.error("Invalid credentials")
+                        except Exception as e:
+                            st.error(f"Error during login: {str(e)}")
+
         # Force home page on first load
-        if 'initial_load' not in st.session_state:
+        if "initial_load" not in st.session_state:
             st.session_state.initial_load = True
-            st.session_state.page = 'home'
+            st.session_state.page = "home"
             st.rerun()
-        
+
         # Get current page and render it
-        current_page = st.session_state.get('page', 'home')
-        
+        current_page = st.session_state.get("page", "home")
+
         # Create a mapping of cleaned page names to original names
-        page_mapping = {name.lower().replace(" ", "_").replace("🏠", "").replace("🔍", "").replace("📝", "").replace("📊", "").replace("🎯", "").replace("💬", "").replace("ℹ️", "").strip(): name 
-                       for name in self.pages.keys()}
-        
+        page_mapping = {
+            name.lower()
+            .replace(" ", "_")
+            .replace("🏠", "")
+            .replace("🔍", "")
+            .replace("📝", "")
+            .replace("📊", "")
+            .replace("🎯", "")
+            .replace("💬", "")
+            .replace("ℹ️", "")
+            .strip(): name
+            for name in self.pages.keys()
+        }
+
         # Render the appropriate page
         if current_page in page_mapping:
             self.pages[page_mapping[current_page]]()
         else:
             # Default to home page if invalid page
             self.render_home()
-    
+
 
 if __name__ == "__main__":
     app = ResumeApp()
