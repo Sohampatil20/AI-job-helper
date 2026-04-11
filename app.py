@@ -119,7 +119,7 @@ class ResumeApp:
         init_database()
 
         # ✅ DATABASE INIT + ADMIN AUTO CREATE ADDED HERE
-        init_database()
+      
         add_admin("admin@gmail.com", "1234")
 
 
