@@ -41,6 +41,7 @@ from config.database import (
     get_ai_analysis_stats,
     reset_ai_analysis_stats,
     get_detailed_ai_analysis_stats,
+    add_admin,
 )
 from utils.ai_resume_analyzer import AIResumeAnalyzer
 from utils.resume_builder import ResumeBuilder
@@ -116,6 +117,11 @@ class ResumeApp:
 
         # Initialize database
         init_database()
+
+        # ✅ DATABASE INIT + ADMIN AUTO CREATE ADDED HERE
+        init_database()
+        add_admin("admin@gmail.com", "1234")
+
 
         # Load external CSS
         with open("style/style.css") as f:
